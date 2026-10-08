@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Phishing Shield AI",
+  "version": "1.0",
+  "description": "Real-time AI-powered protection against malicious sites and phishing forms.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Phishing Shield AI",
+    "default_popup": "popup.html"
+  }
+}

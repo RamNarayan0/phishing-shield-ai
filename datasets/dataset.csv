@@ -1,0 +1,31 @@
+text,label,type
+"Hey Rahul, are you coming to college tomorrow?",0,safe
+"Let's meet near the library at 10 AM.",0,safe
+"Can you send me the notes from yesterday's class?",0,safe
+"Your order #12345 has been shipped. Track it here: https://amazon.com/track",0,safe
+"Dinner at 8 PM at the usual place?",0,safe
+"Don't forget to call mom later.",0,safe
+"I left my keys on the table, can you bring them?",0,safe
+"The meeting is rescheduled to 2 PM.",0,safe
+"Are we still on for tomorrow?",0,safe
+"Happy Birthday! Hope you have a great day.",0,safe
+"Your account requires verification. Please verify your information.",1,suspicious
+"We noticed a login from an unrecognized device.",1,suspicious
+"Update your details to continue using our services.",1,suspicious
+"Security alert: Please check your account activity.",1,suspicious
+"Your password will expire in 24 hours.",1,suspicious
+"We need to verify your identity. Please follow the instructions.",1,suspicious
+"A payment of $500 was attempted on your card.",1,suspicious
+"Your subscription has been paused due to billing error.",1,suspicious
+"Please confirm your email address to keep your account active.",1,suspicious
+"Important notice regarding your recent transaction.",1,suspicious
+"URGENT: Your bank account has been suspended. Verify immediately at: https://example-bank-login.com",2,critical
+"LAST WARNING: Your Apple ID is locked. Unlock now at https://app1e-support-verify.com",2,critical
+"Congratulations! You've won $1,000,000! Claim your prize here: https://lottery-winner-claim.net",2,critical
+"Action Required: Your PayPal account is limited. Update your payment info: https://paypa1-update.com",2,critical
+"FedEx: Your package delivery failed. Pay the $2.99 fee to reschedule: https://fedex-redelivery.net",2,critical
+"Netflix: Your payment declined. Please update your card details at https://netf1ix-billing.com",2,critical
+"Microsoft Support: We detected a virus on your PC. Call +1-800-555-0199 immediately.",2,critical
+"KYC VERIFICATION PENDING: Your crypto wallet will be frozen. Verify KYC now: https://binance-kyc-verify.io",2,critical
+"IRS: You have a pending tax refund of $1,200. Claim it here: https://irs-gov-refund.org",2,critical
+"HR: Please review the updated company salary structure attached in this secure document: https://secure-docs-login.com",2,critical

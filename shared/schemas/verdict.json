@@ -1,0 +1,25 @@
+{
+  "title": "Verdict",
+  "type": "object",
+  "properties": {
+    "verdict": { "type": "string" },
+    "risk_score": { "type": "integer" },
+    "confidence": { "type": "number" },
+    "reasons": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "urls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string" },
+          "risk": { "type": "integer" }
+        }
+      }
+    },
+    "recommended_action": { "type": "string" }
+  },
+  "required": ["verdict", "risk_score", "confidence", "reasons", "urls", "recommended_action"]
+}

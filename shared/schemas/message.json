@@ -1,0 +1,17 @@
+{
+  "title": "Message",
+  "type": "object",
+  "properties": {
+    "request_id": { "type": "string" },
+    "source_platform": { "type": "string" },
+    "sender_id": { "type": "string" },
+    "raw_text": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "urls": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "metadata": { "type": "object" }
+  },
+  "required": ["source_platform", "raw_text"]
+}
