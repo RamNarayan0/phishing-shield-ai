@@ -115,7 +115,7 @@ Write-Host "[*] Target installation directory: $InstallPath" -ForegroundColor Gr
 # ------------------------------------------------------------------------------
 # 3. BACKEND API & TAILSCALE CONFIGURATION
 # ------------------------------------------------------------------------------
-$DEFAULT_CLOUD_URL = "https://phishing-shield-ai-backend.onrender.com"
+$DEFAULT_CLOUD_URL = "https://two-dash-apnic-robin.trycloudflare.com"
 
 if (-not $BackendUrl -or $BackendUrl.Trim() -eq "") {
     if ($NonInteractive) {
