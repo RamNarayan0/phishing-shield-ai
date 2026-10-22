@@ -13,20 +13,29 @@ function App() {
   
   // Ref to automatically scroll to the latest event
   const streamEndRef = useRef(null)
-  const API_BASE_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8000`
+  
+  const defaultApi = import.meta.env.VITE_API_URL || 
+    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://127.0.0.1:8000'
+      : 'https://phishing-shield-ai-backend.onrender.com')
+  const [apiUrl, setApiUrl] = useState(() => localStorage.getItem('phishing_api_url') || defaultApi)
+  const [backendOnline, setBackendOnline] = useState(false)
 
   // Poll the backend for new events every 2 seconds
   useEffect(() => {
+    let isMounted = true;
     const fetchEvents = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/events`);
+        const res = await fetch(`${apiUrl}/api/events`);
         if (res.ok) {
           const data = await res.json();
-          setEvents(data.events);
+          if (!isMounted) return;
+          setEvents(data.events || []);
+          setBackendOnline(true);
           
           // Recompute stats
           const s = { total: 0, safe: 0, suspicious: 0, high: 0, critical: 0 };
-          data.events.forEach(evt => {
+          (data.events || []).forEach(evt => {
             s.total++;
             if (evt.result.risk_score >= 80) s.critical++;
             else if (evt.result.risk_score >= 60) s.high++;
@@ -34,24 +43,29 @@ function App() {
             else s.safe++;
           });
           setStats(s);
+        } else {
+          if (isMounted) setBackendOnline(false);
         }
       } catch (err) {
-        // Backend might be offline, ignore silently for now
+        if (isMounted) setBackendOnline(false);
       }
     };
     
     fetchEvents();
     const interval = setInterval(fetchEvents, 2000);
-    return () => clearInterval(interval);
-  }, [API_BASE_URL]);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [apiUrl]);
 
   const analyzeManual = async () => {
     if (!manualText.trim()) return;
     setLoading(true)
     try {
-      const apiUrl = `${API_BASE_URL}/api/verify-message`
+      const endpoint = `${apiUrl}/api/verify-message`
       const payload = { raw_text: manualText, source_platform: 'Manual Paste' }
-      const response = await fetch(apiUrl, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -69,7 +83,7 @@ function App() {
   const analyzeEvent = async (rawText, source = 'Android Notification', app = 'WhatsApp', sender = 'Unknown Contact') => {
     setLoading(true)
     try {
-      const apiUrl = `${API_BASE_URL}/api/verify-message`
+      const endpoint = `${apiUrl}/api/verify-message`
       
       const payload = {
         raw_text: rawText,
@@ -77,7 +91,7 @@ function App() {
         sender_id: sender
       }
 
-      const response = await fetch(apiUrl, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -170,12 +184,29 @@ function App() {
           </button>
         </div>
 
-        <div className="flex items-center gap-3 text-emerald-400 font-bold tracking-widest">
-          <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-          </span>
-          PROTECTION ACTIVE
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-2 bg-slate-800/90 px-2.5 py-1 rounded text-xs border border-slate-700">
+            <span className={`inline-block w-2 h-2 rounded-full ${backendOnline ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`}></span>
+            <select 
+              value={apiUrl}
+              onChange={(e) => {
+                setApiUrl(e.target.value);
+                localStorage.setItem('phishing_api_url', e.target.value);
+              }}
+              className="bg-transparent text-slate-300 font-mono text-[11px] outline-none cursor-pointer"
+            >
+              <option value="http://127.0.0.1:8000" className="bg-slate-900 text-slate-200">Local (127.0.0.1:8000)</option>
+              <option value="https://phishing-shield-ai-backend.onrender.com" className="bg-slate-900 text-slate-200">Cloud Render API</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs tracking-widest">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            ACTIVE
+          </div>
         </div>
       </header>
 
