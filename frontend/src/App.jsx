@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Shield, ShieldAlert, ShieldCheck, AlertTriangle, Smartphone, Chrome, Mail, Database, Server, Activity, CheckCircle2 } from 'lucide-react'
+import { Shield, ShieldAlert, ShieldCheck, AlertTriangle, Smartphone, Chrome, Mail, Phone, Database, Server, Activity, CheckCircle2 } from 'lucide-react'
 
 function App() {
   const [activeTab, setActiveTab] = useState('stream')
@@ -73,7 +73,8 @@ function App() {
       
       const payload = {
         raw_text: rawText,
-        source_platform: source
+        source_platform: source,
+        sender_id: sender
       }
 
       const response = await fetch(apiUrl, {
@@ -120,12 +121,15 @@ function App() {
   }
 
   const presets = [
-    { label: "NORMAL MESSAGE", app: "Telegram", text: "Hey, are you coming to college tomorrow? Let's meet near the library at 10 AM." },
-    { label: "BANK PHISHING", app: "WhatsApp", text: "URGENT SECURITY ALERT\n\nYour bank account has been temporarily suspended.\n\nVerify your identity immediately:\nhttps://secure-bank-login-example.com/verify" },
-    { label: "KYC SCAM", app: "WhatsApp", text: "KYC VERIFICATION PENDING: Your crypto wallet will be frozen. Verify KYC now: https://binance-kyc-verify.io" },
-    { label: "DELIVERY SCAM", app: "SMS", text: "FedEx: Your package delivery failed. Pay the $2.99 fee to reschedule: https://fedex-redelivery.net" },
-    { label: "FAKE JOB", app: "Telegram", text: "You have been selected for a remote part-time job! Earn $500/day. Pay $50 registration fee to start: https://fake-job-portal.com" },
-    { label: "LOTTERY SCAM", app: "SMS", text: "Congratulations! You've won $1,000,000! Claim your prize here: https://lottery-winner-claim.net" },
+    { label: "NORMAL MESSAGE (SAFE)", app: "WhatsApp", sender: "+91 98480 12345", text: "Hey, are you coming to college tomorrow? Let's meet near the library at 10 AM." },
+    { label: "ELECTRICITY SMISHING (CRITICAL)", app: "SMS", sender: "+91 9876543210", text: "Dear consumer, your electricity power will be disconnected tonight at 9:30 PM due to unpaid bill. Immediately contact Electricity Officer: +919876543210" },
+    { label: "KBC LOTTERY CALL (+92) (CRITICAL)", app: "WhatsApp", sender: "+92 300 1234567", text: "Congratulations! Your mobile number won 25 Lakhs in Kaun Banega Crorepati WhatsApp Lottery. Contact lottery manager on WhatsApp: +923001234567" },
+    { label: "UK TOLL TRAP / SHORTCODE (CRITICAL)", app: "SMS", sender: "PRIZE-ALERT", text: "WINNER!! Claim £900 cash reward. Call 09061701461 now or text WIN to 87121 to confirm." },
+    { label: "SPOOFED SENDER EMAIL (CRITICAL)", app: "Email", sender: 'State Bank of India <alerts@sbi-kyc-update.top>', text: "URGENT: Your SBI net banking account is blocked. Mandatory PAN card update required." },
+    { label: "FREE WEBMAIL BRAND SPOOF (CRITICAL)", app: "Email", sender: "paypal.support@gmail.com", text: "SECURITY WARNING: Unauthorized payment of $499.00 processed. If this was not you, update your password now." },
+    { label: "BANK PHISHING URL (CRITICAL)", app: "Chrome", sender: "+234 802 123 4567", text: "URGENT SECURITY ALERT: Your bank account has been suspended. Verify credentials immediately: http://sbi-netbanking-verify.login-portal.com" },
+    { label: "KYC WALLET FREEZE (CRITICAL)", app: "WhatsApp", sender: "+44 7911 123456", text: "KYC VERIFICATION PENDING: Your Binance crypto wallet will be frozen within 24 hours. Verify KYC now: https://binance-kyc-verify.io" },
+    { label: "DELIVERY SMISHING (HIGH RISK)", app: "SMS", sender: "+1 555 019 2834", text: "FedEx Alert: Your shipment delivery failed due to unpaid customs fee ($2.99). Confirm address and pay fee here: http://fedex-redelivery-notice.info" }
   ]
 
   const getRiskColor = (score) => {
@@ -213,7 +217,7 @@ function App() {
                   <ul className="space-y-2">
                     {manualResult.reasons.map((r, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
-                        <span className={getRiskColor(manualResult.risk_score)}>o"</span> {r}
+                        <span className={getRiskColor(manualResult.risk_score)}>✓</span> {r}
                       </li>
                     ))}
                   </ul>
@@ -221,6 +225,36 @@ function App() {
                   <p className="text-sm text-slate-500 italic">No suspicious signals detected.</p>
                 )}
               </div>
+
+              {manualResult.extracted_phones && manualResult.extracted_phones.length > 0 && (
+                <div className="bg-slate-950 border border-slate-800 rounded p-4 mb-4">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <Phone size={14} className="text-amber-400" /> Extracted Phone Numbers
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {manualResult.extracted_phones.map((p, i) => (
+                      <span key={i} className="px-2 py-1 text-xs font-mono bg-slate-900 border border-amber-800 text-amber-300 rounded">
+                        {p}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {manualResult.extracted_emails && manualResult.extracted_emails.length > 0 && (
+                <div className="bg-slate-950 border border-slate-800 rounded p-4 mb-4">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <Mail size={14} className="text-purple-400" /> Extracted Email Addresses
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {manualResult.extracted_emails.map((e, i) => (
+                      <span key={i} className="px-2 py-1 text-xs font-mono bg-slate-900 border border-purple-800 text-purple-300 rounded">
+                        {e}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className={`p-3 rounded font-bold text-center text-xs tracking-widest uppercase ${getRiskBg(manualResult.risk_score)} text-slate-950`}>
                 RECOMMENDED ACTION: {manualResult.recommended_action.replace(/_/g, ' ')}
               </div>
@@ -247,6 +281,32 @@ function App() {
             </ul>
           </div>
 
+          <div className="pt-4 border-t border-slate-800">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Simulate Phishing Attacks</h3>
+            <div className="flex flex-col gap-2">
+              {presets.map((preset, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => analyzeEvent(preset.text, `${preset.app} Interceptor`, preset.app, preset.sender)}
+                  disabled={loading}
+                  className={`text-left p-2.5 rounded text-xs font-bold transition-all border ${
+                    preset.label.includes('BANK') || preset.label.includes('PAYPAL') || preset.label.includes('KYC')
+                      ? 'bg-red-950/40 border-red-800/60 text-red-300 hover:bg-red-900/50'
+                      : preset.label.includes('DELIVERY') || preset.label.includes('LOTTERY')
+                      ? 'bg-orange-950/40 border-orange-800/60 text-orange-300 hover:bg-orange-900/50'
+                      : preset.label.includes('NORMAL')
+                      ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300 hover:bg-emerald-900/50'
+                      : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  <div className="flex justify-between items-center">
+                    <span>{preset.label}</span>
+                    <span className="text-[10px] opacity-75 font-mono">[{preset.app}]</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="pt-6 border-t border-slate-800">
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Live Statistics</h3>
@@ -387,6 +447,40 @@ function App() {
                     </div>
                   </div>
                 )}
+
+                {/* PHONES */}
+                {selectedEvent.result.extracted_phones && selectedEvent.result.extracted_phones.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                      <Phone size={14} className="text-amber-400" /> Analyzed Phone Numbers
+                    </h3>
+                    <div className="bg-slate-950 border border-slate-800 rounded p-4 space-y-2">
+                      {selectedEvent.result.extracted_phones.map((p, i) => (
+                        <div key={i} className="text-xs text-amber-400 font-mono flex items-center justify-between bg-slate-900 p-2 rounded">
+                          <span>{p}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-amber-950/60 text-amber-300 border border-amber-800">Scanned Pattern</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* EMAILS */}
+                {selectedEvent.result.extracted_emails && selectedEvent.result.extracted_emails.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                      <Mail size={14} className="text-purple-400" /> Analyzed Email Senders
+                    </h3>
+                    <div className="bg-slate-950 border border-slate-800 rounded p-4 space-y-2">
+                      {selectedEvent.result.extracted_emails.map((e, i) => (
+                        <div key={i} className="text-xs text-purple-400 font-mono flex items-center justify-between bg-slate-900 p-2 rounded">
+                          <span>{e}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-purple-950/60 text-purple-300 border border-purple-800">Spoof Check</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 
                 {/* ML ENGINE / RISK BREAKDOWN */}
                 <div>
@@ -403,6 +497,10 @@ function App() {
                     <div>
                       <div className="flex justify-between mb-1"><span className="text-slate-400">URL Analysis</span><span className="text-amber-400">{selectedEvent.result.url_score}%</span></div>
                       <div className="w-full bg-slate-900 rounded h-1.5"><div className="bg-amber-500 h-1.5 rounded" style={{width: `${selectedEvent.result.url_score}%`}}></div></div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1"><span className="text-slate-400">Sender / Vector Check</span><span className="text-rose-400">{selectedEvent.result.sender_score || 0}%</span></div>
+                      <div className="w-full bg-slate-900 rounded h-1.5"><div className="bg-rose-500 h-1.5 rounded" style={{width: `${selectedEvent.result.sender_score || 0}%`}}></div></div>
                     </div>
                   </div>
                 </div>

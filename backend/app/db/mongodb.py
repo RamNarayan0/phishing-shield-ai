@@ -1,7 +1,7 @@
 import os
 import logging
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -50,7 +50,7 @@ def save_alert(alert_data: Dict[str, Any]) -> Dict[str, Any]:
     
     # Add created_at timestamp if missing
     if "created_at" not in alert_data:
-        alert_data["created_at"] = datetime.utcnow().isoformat()
+        alert_data["created_at"] = datetime.now(timezone.utc).isoformat()
     
     # Store in memory for instant local retrieval
     _in_memory_alerts.insert(0, alert_data)

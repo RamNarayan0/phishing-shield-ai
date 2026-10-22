@@ -11,7 +11,10 @@ class FinalVerdict(BaseModel):
     ml_score: float = 0.0
     heuristic_score: int = 0
     url_score: int = 0
+    sender_score: int = 0
     confidence: float
     reasons: List[str]
-    extracted_urls: List[str]
+    extracted_urls: List[str] = []
+    extracted_phones: List[str] = []
+    extracted_emails: List[str] = []
     recommended_action: str

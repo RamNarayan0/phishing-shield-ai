@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 class MessagePayload(BaseModel):
@@ -8,6 +8,6 @@ class MessagePayload(BaseModel):
     source_platform: str = Field(default="web", description="web, android, chrome")
     sender_id: Optional[str] = None
     raw_text: str
-    timestamp: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    timestamp: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
     urls: Optional[List[str]] = []
     metadata: Optional[Dict[str, Any]] = {}

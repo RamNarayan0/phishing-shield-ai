@@ -92,3 +92,65 @@ def test_malformed_url():
     text = "Check this out: http://"
     urls = URLExtractor.extract_urls(text)
     assert len(urls) == 0
+
+def test_phone_extraction_and_smishing():
+    from app.extraction.phone_extractor import PhoneExtractor
+    text = "Power supply will be disconnected tonight. Call officer immediately: +919876543210"
+    phones = PhoneExtractor.extract_phones(text)
+    assert len(phones) >= 1
+    assert "+919876543210" in phones[0] or "9876543210" in phones[0]
+
+    payload = {
+        "raw_text": text,
+        "sender_id": "+919876543210"
+    }
+    response = client.post("/api/verify-message", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] in ["HIGH RISK", "CRITICAL"]
+    assert any("Institutional impersonation" in r for r in data["reasons"])
+
+def test_high_risk_country_phone_lottery():
+    payload = {
+        "raw_text": "Congratulations! You won 25 Lakhs in WhatsApp Lottery. Contact +923001234567",
+        "sender_id": "+923001234567"
+    }
+    response = client.post("/api/verify-message", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] in ["HIGH RISK", "CRITICAL"]
+    assert any("+92" in r for r in data["reasons"])
+
+def test_uk_premium_toll_shortcode():
+    payload = {
+        "raw_text": "WINNER!! Claim £900 cash reward. Call 09061701461 now or text WIN to 87121",
+        "sender_id": "CLAIM-PRIZE"
+    }
+    response = client.post("/api/verify-message", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] in ["HIGH RISK", "CRITICAL"]
+    assert any("Premium Rate" in r for r in data["reasons"])
+
+def test_email_brand_webmail_impersonation():
+    payload = {
+        "raw_text": "Your PayPal transaction was declined. Confirm identity immediately.",
+        "sender_id": "paypal.support@gmail.com"
+    }
+    response = client.post("/api/verify-message", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] in ["HIGH RISK", "CRITICAL"]
+    assert any("brand impersonation" in r.lower() for r in data["reasons"])
+
+def test_email_display_name_spoofing():
+    payload = {
+        "raw_text": "URGENT: Your SBI net banking account is blocked. Mandatory update.",
+        "sender_id": "State Bank of India <alerts@sbi-kyc-update.top>"
+    }
+    response = client.post("/api/verify-message", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] in ["HIGH RISK", "CRITICAL"]
+    assert any("spoofing" in r.lower() for r in data["reasons"])
+

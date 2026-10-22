@@ -1,7 +1,14 @@
-// background.js - Phishing Shield AI Chrome Extension
+// background.js - Phishing Shield AI Chrome Extension (Cloud & Local Support)
+
+const DEFAULT_CLOUD_URL = "https://phishing-shield-ai-backend.onrender.com";
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Phishing Shield AI installed.");
+  chrome.storage.local.get(["apiUrl"], (res) => {
+    if (!res.apiUrl) {
+      chrome.storage.local.set({ apiUrl: "auto" });
+    }
+  });
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -10,32 +17,59 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       try {
         const payload = {
           raw_text: message.payload || "Empty Content",
-          source_platform: "Chrome Web",
+          source_platform: "Chrome Extension",
           sender_id: message.senderId || "Unknown",
           urls: sender.tab ? [sender.tab.url] : []
         };
 
-        let data = null;
+        // Determine target endpoints (User preference > Cloud Render > Local fallback)
+        const storageData = await chrome.storage.local.get(["apiUrl"]);
+        const configUrl = storageData.apiUrl || "auto";
 
-        // Try localhost first, then 127.0.0.1 fallback
-        for (const host of ["localhost", "127.0.0.1"]) {
+        let candidateEndpoints = [];
+        if (configUrl && configUrl !== "auto") {
+          candidateEndpoints.push(configUrl.replace(/\/+$/, '') + "/api/verify-message");
+        } else {
+          // In auto mode, try local first for dev, then cloud Render
+          candidateEndpoints.push("http://127.0.0.1:8000/api/verify-message");
+          candidateEndpoints.push("http://localhost:8000/api/verify-message");
+          candidateEndpoints.push(`${DEFAULT_CLOUD_URL}/api/verify-message`);
+        }
+
+        let data = null;
+        let lastError = null;
+
+        for (const endpoint of candidateEndpoints) {
           try {
-            const res = await fetch(`http://${host}:8000/api/verify-message`, {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+            const res = await fetch(endpoint, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload)
+              body: JSON.stringify(payload),
+              signal: controller.signal
             });
-            data = await res.json();
-            break; // success, stop trying
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+              data = await res.json();
+              data._endpoint_used = endpoint;
+              break;
+            }
           } catch (e) {
-            console.warn(`Failed on ${host}:`, e.message);
+            lastError = e.message;
+            console.warn(`Connection attempt failed on ${endpoint}:`, e.message);
           }
         }
 
         if (data) {
           sendResponse({ result: data });
         } else {
-          sendResponse({ result: null, error: "Cannot reach backend. Make sure the server is running on port 8000." });
+          sendResponse({
+            result: null,
+            error: `Cannot reach backend services. Checked: ${candidateEndpoints.join(', ')}. Last error: ${lastError || 'Timeout'}`
+          });
         }
       } catch (err) {
         console.error("Analysis Error:", err);

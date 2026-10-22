@@ -5,10 +5,13 @@
   "description": "Real-time AI-powered protection against malicious sites and phishing forms.",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "storage"
   ],
   "host_permissions": [
     "<all_urls>",
+    "https://*.onrender.com/*",
+    "https://*.vercel.app/*",
     "http://127.0.0.1/*",
     "http://localhost/*"
   ],

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cybersecurity Phishing Detection System - Project Abstract & Functional Flow</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 10mm 15mm 10mm 15mm;
+  }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 15px;
+    color: #000;
+    margin: 0;
+    padding: 20px;
+    background: #e2e8f0;
+  }
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 12mm 16mm;
+    margin: 0 auto 25px auto;
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    box-sizing: border-box;
+    page-break-after: always;
+  }
+  .logo-header {
+    width: 100%;
+    display: block;
+    margin: 0 auto 6px auto;
+  }
+  .proj-banner {
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    margin: 4px 0 2px 0;
+  }
+  .viksit-banner {
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 2px 0 10px 0;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    padding: 0;
+  }
+  .abs-title {
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    margin: 6px 0 10px 0;
+    letter-spacing: 0.5px;
+  }
+  table.main-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1.5px solid #000;
+    font-size: 15px;
+  }
+  table.main-table td, table.main-table th {
+    border: 1px solid #000;
+    padding: 5px 8px;
+    vertical-align: middle;
+  }
+  .font-bold {
+    font-weight: bold;
+  }
+  .abs-text {
+    text-align: justify;
+    line-height: 1.35;
+    font-size: 14.5px;
+    font-weight: normal !important;
+    padding: 8px !important;
+  }
+  .abs-text p {
+    margin: 0 0 6px 0;
+    text-indent: 18px;
+  }
+  .diagram-img {
+    width: 100%;
+    max-width: 530px;
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+  }
+  .sig-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+    padding: 0 30px;
+    font-weight: bold;
+    font-size: 15px;
+  }
+
+  @media print {
+    body { background: transparent; padding: 0; }
+    .page { box-shadow: none; margin: 0; padding: 10mm 15mm; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="no-print" style="text-align: center; margin-bottom: 15px;">
+  <button onclick="window.print()" style="padding: 11px 26px; font-size: 15px; font-weight: bold; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(37,99,235,0.3);">
+    🖨️ Print / Save as PDF (Ctrl + P)
+  </button>
+</div>
+
+<!-- ================= PAGE 1 ================= -->
+<div class="page">
+  <img src="college_header_logo.png" class="logo-header" alt="Vignan Institute of Technology and Science">
+
+  <div class="proj-banner">DIGITAL INDIA INNOVATION VIGNAN'S INNOVATIVE PROJECT</div>
+  <div class="viksit-banner">VIKSIT BHARATH 2047</div>
+
+  <div class="meta-row">
+    <div>YEAR & SEMESTER: III Year & II Sem</div>
+    <div>ACADEMIC YEAR: 2026-27</div>
+  </div>
+
+  <div class="abs-title">ABSTRACT</div>
+
+  <table class="main-table">
+    <tr>
+      <td class="font-bold" style="width: 24%;">Batch No.</td>
+      <td colspan="2" class="font-bold">&nbsp;&nbsp;&nbsp;&nbsp;3B2</td>
+    </tr>
+    <tr>
+      <td class="font-bold">Title of the<br>Project</td>
+      <td colspan="2" class="font-bold">&nbsp;&nbsp;&nbsp;&nbsp;Cybersecurity Phishing Detection System</td>
+    </tr>
+    <tr>
+      <td rowspan="5" class="font-bold">Student Details</td>
+      <td class="font-bold" style="width: 28%;">Roll No</td>
+      <td class="font-bold">Name of the Student</td>
+    </tr>
+    <tr>
+      <td>24891A0594</td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;KOTHAPALLY BINDUSREE</td>
+    </tr>
+    <tr>
+      <td>24891A0596</td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;MALLEPAKULA BHUVANISHWARI</td>
+    </tr>
+    <tr>
+      <td>24891A0575</td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;DUNGROTHU NIKHIL</td>
+    </tr>
+    <tr>
+      <td>24891A0573</td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;DEVARASHETTY RAM NARAYAN</td>
+    </tr>
+    <tr>
+      <td class="font-bold">Guide Name</td>
+      <td colspan="2" class="font-bold">&nbsp;&nbsp;&nbsp;&nbsp;Mr. VSSPLN Balaji Lanka</td>
+    </tr>
+    <tr>
+      <td class="font-bold">Name of the<br>Subject</td>
+      <td colspan="2">Cyber Security, AI&ML</td>
+    </tr>
+    <tr>
+      <td class="font-bold" style="vertical-align: top;">Abstract</td>
+      <td colspan="2" class="abs-text">
+        <p>Phishing attacks have rapidly evolved from traditional deceptive emails into sophisticated, multi-channel social engineering campaigns spanning modern messaging applications such as WhatsApp Web, instant messaging platforms, SMS, and corporate emails. Conventional security defense mechanisms relying strictly on static domain blocklists or single-vector heuristics are consistently bypassed by zero-day typosquatting domains, brand impersonation using free email services, and fast-flux URL redirects.</p>
+        <p>Cybersecurity Phishing Detection System is an end-to-end, multi-vector defense solution engineered to intercept and neutralize phishing threats in real time across multiple communication channels. The solution employs a lightweight browser extension and client-side listeners that capture incoming textual payloads, embedded URLs, and sender identifiers directly from active web sessions without disrupting user experience. The intercepted data is processed by a hybrid AI risk evaluation engine combining Natural Language Processing (NLP) heuristics, a TF-IDF with Logistic Regression machine learning classifier, and deep sender reputation analytics.</p>
+        <p>The system evaluates sender authenticity by detecting brand typosquatting via Levenshtein-distance heuristics, flagging unauthorized free-provider impersonations (e.g., claiming to be PayPal or Amazon from a Gmail address), and assessing international phone prefixes. A multi-factor risk scoring algorithm synthesizes text urgency, domain legitimacy, and sender integrity into an actionable threat score (0–100) and categorized verdict (SAFE, SUSPICIOUS, HIGH RISK, CRITICAL). Confirmed security incidents are logged to a cloud-hosted MongoDB alerts database and streamed in real time to a centralized SOC Web Dashboard, providing security analysts with instant situational awareness and automated incident mitigation.</p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<!-- ================= PAGE 2 ================= -->
+<div class="page">
+  <img src="college_header_logo.png" class="logo-header" alt="Vignan Institute of Technology and Science">
+
+  <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; margin-top: 15px; font-size: 15px;">
+    <tr>
+      <td style="width: 24%; font-weight: bold; font-size: 15px; text-align: center; border: 1px solid #000; padding: 20px 10px; vertical-align: middle;">
+        Image/<br>Functional<br>Diagram
+      </td>
+      <td style="border: 1px solid #000; padding: 15px; text-align: center;">
+        <img src="phishing_shield_flow_diagram.png" class="diagram-img" alt="Cybersecurity Phishing Detection System - Functional Flow Diagram">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" style="border: 1px solid #000; padding: 50px 30px 25px 30px;">
+        <div class="sig-row">
+          <div>SIGNATURE OF THE GUIDE</div>
+          <div>SIGNATURE OF THE HOD</div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

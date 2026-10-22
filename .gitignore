@@ -47,3 +47,49 @@ Thumbs.db
 # Media build artifacts (optional)
 *.wav
 *.mp4
+
+# Raw External Datasets (reproducible via download/build scripts)
+datasets/Kaggle_Phishing_Email.csv
+datasets/kaggle_combined_phishing_dataset.csv
+datasets/spamassassin.csv
+datasets/nigerian_fraud.csv
+datasets/kaggle_enron_spam_ham.csv
+datasets/nazario_phishing.csv
+
+# Temporary scratch media & working renders
+page1_*.png
+page2_*.png
+scene_*.png
+test_*.png
+test_*.pdf
+claude_*
+college_header_logo*.png
+extracted_original_header.png
+original_diagram_sample.png
+clean_no_slash.pdf
+
+# Root utility / automation scratch scripts
+auto_create_and_push.py
+check_user.py
+create_and_push_now.py
+create_github_repo.py
+create_repo_from_profile.py
+crop_clean_logo.py
+extract_logo.py
+finish_github_push.py
+generate_abstract_docx.py
+generate_diagram_png.py
+generate_final_abstract.py
+generate_matched_docx.py
+generate_perfect_docx.py
+get_user_repos.py
+inspect_*.py
+open_gmail.py
+read_github_errors.py
+scroll_click_push.py
+submit_github.py
+trim_logo.py
+trusted_input_create.py
+render_video.py
+browser_agent.py
+navigate_and_test.py

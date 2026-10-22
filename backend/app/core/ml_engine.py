@@ -24,6 +24,11 @@ class MLEngine:
             print(f"ML Engine Init Error: {e}")
             
     @classmethod
+    def reload(cls):
+        cls._initialized = False
+        cls.initialize()
+
+    @classmethod
     def predict(cls, text: str) -> dict:
         cls.initialize()
         
@@ -34,14 +39,12 @@ class MLEngine:
             # Transform text
             features = cls._vectorizer.transform([text])
             # Get probability of class 1 (phishing)
-            proba = cls._model.predict_proba(features)[0][1]
+            proba = float(cls._model.predict_proba(features)[0][1])
+            score = int(round(proba * 100))
             
-            # Prototype threshold to prevent false positives on small dataset
-            if proba < 0.6:
-                return {"ml_score": 0, "active": True}
-                
             return {
-                "ml_score": int(proba * 100),
+                "ml_score": score,
+                "probability": proba,
                 "active": True
             }
         except Exception as e:
