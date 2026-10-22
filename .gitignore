@@ -93,3 +93,6 @@ trusted_input_create.py
 render_video.py
 browser_agent.py
 navigate_and_test.py
+
+cloudflared.exe
+
