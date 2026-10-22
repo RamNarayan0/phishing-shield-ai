@@ -50,11 +50,16 @@ The backend is configured via [`render.yaml`](./render.yaml) for automated deplo
 
 ---
 
-## 3. Vercel Deployment (Frontend Dashboard)
+## 3. Frontend Dashboard Deployment (GitHub Pages & Vercel)
 
-The frontend is optimized for zero-config static hosting with SPA rewrites via [`frontend/vercel.json`](./frontend/vercel.json).
+### Live GitHub Pages Dashboard (Active Now):
+The frontend has been built and deployed live directly via GitHub Pages:
+* **Live Dashboard URL**: [https://ramnarayan0.github.io/phishing-shield-ai/](https://ramnarayan0.github.io/phishing-shield-ai/)
 
-### Option A: Via Vercel Web Dashboard (Recommended)
+### Vercel Deployment Option:
+The frontend is also configured for zero-config static hosting with SPA rewrites via [`frontend/vercel.json`](./frontend/vercel.json).
+
+#### Option A: Via Vercel Web Dashboard (1-Click Import)
 1. Go to [https://vercel.com/new](https://vercel.com/new).
 2. Click **Import** next to `RamNarayan0/phishing-shield-ai`.
 3. In **Project Configuration**:
@@ -64,12 +69,9 @@ The frontend is optimized for zero-config static hosting with SPA rewrites via [
    * **Output Directory**: `dist`
 4. Under **Environment Variables**, add:
    * `VITE_API_URL` = `https://phishing-shield-ai-backend.onrender.com`
-5. Click **Deploy**. Your dashboard will be live at:
-   ```
-   https://phishing-shield-ai.vercel.app
-   ```
+5. Click **Deploy**.
 
-### Option B: Via Vercel CLI
+#### Option B: Via Vercel CLI
 ```bash
 cd frontend
 npx vercel --prod
@@ -81,15 +83,16 @@ npx vercel --prod
 
 The extension has been upgraded to Manifest V3 with dual-mode support (Cloud Production vs Local Development).
 
-### Package Details:
-* **ZIP Archive**: [`dist/phishing-shield-ai-chrome-extension.zip`](./dist/phishing-shield-ai-chrome-extension.zip)
+### Cloud Package & Release:
+* **GitHub Release Page**: [https://github.com/RamNarayan0/phishing-shield-ai/releases/tag/v1.0.0](https://github.com/RamNarayan0/phishing-shield-ai/releases/tag/v1.0.0)
+* **Direct Cloud ZIP Download**: [https://github.com/RamNarayan0/phishing-shield-ai/releases/download/v1.0.0/phishing-shield-ai-chrome-extension.zip](https://github.com/RamNarayan0/phishing-shield-ai/releases/download/v1.0.0/phishing-shield-ai-chrome-extension.zip)
 * **Manifest Version**: 3
 * **Host Permissions**: `<all_urls>`, `https://*.onrender.com/*`, `https://*.vercel.app/*`
 
 ### To Deploy to Chrome Web Store:
 1. Go to the [Chrome Developer Dashboard](https://chrome.google.com/webstore/devconsole).
 2. Click **Add New Item**.
-3. Upload the packaged archive: `dist/phishing-shield-ai-chrome-extension.zip`.
+3. Upload the packaged archive: `dist/phishing-shield-ai-chrome-extension.zip` or download directly from GitHub Release.
 4. Fill in description, screenshots, and privacy policy.
 5. Click **Submit for Review**.
 
