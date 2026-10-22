@@ -1,14 +1,25 @@
-// background.js - Phishing Shield AI Chrome Extension (Cloud & Local Support)
+// background.js - Phishing Shield AI Chrome Extension (Cloud, Tailscale & Local Support)
 
-const DEFAULT_CLOUD_URL = "https://phishing-shield-ai-backend.onrender.com";
+const DEFAULT_CLOUD_URL = "https://reference-centered-por-agree.trycloudflare.com";
 
-chrome.runtime.onInstalled.addListener(() => {
-  console.log("Phishing Shield AI installed.");
-  chrome.storage.local.get(["apiUrl"], (res) => {
-    if (!res.apiUrl) {
-      chrome.storage.local.set({ apiUrl: "auto" });
+async function resolveDefaultApiUrl() {
+  try {
+    const res = await fetch(chrome.runtime.getURL("config.json"));
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.apiUrl) return data.apiUrl;
     }
-  });
+  } catch (e) {}
+  return "auto";
+}
+
+chrome.runtime.onInstalled.addListener(async () => {
+  console.log("Phishing Shield AI installed.");
+  const res = await chrome.storage.local.get(["apiUrl"]);
+  if (!res.apiUrl) {
+    const defaultUrl = await resolveDefaultApiUrl();
+    chrome.storage.local.set({ apiUrl: defaultUrl });
+  }
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -22,18 +33,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           urls: sender.tab ? [sender.tab.url] : []
         };
 
-        // Determine target endpoints (User preference > Cloud Render > Local fallback)
+        // Determine target endpoints (User preference > config.json > Cloud > Local fallback)
         const storageData = await chrome.storage.local.get(["apiUrl"]);
-        const configUrl = storageData.apiUrl || "auto";
+        let configUrl = storageData.apiUrl;
+        if (!configUrl || configUrl === "auto") {
+          const fileUrl = await resolveDefaultApiUrl();
+          if (fileUrl && fileUrl !== "auto") {
+            configUrl = fileUrl;
+          }
+        }
+        configUrl = configUrl || "auto";
 
         let candidateEndpoints = [];
         if (configUrl && configUrl !== "auto") {
           candidateEndpoints.push(configUrl.replace(/\/+$/, '') + "/api/verify-message");
         } else {
-          // In auto mode, try local first for dev, then cloud Render
+          // In auto mode, try configured default cloud, then local fallbacks
+          candidateEndpoints.push(`${DEFAULT_CLOUD_URL}/api/verify-message`);
           candidateEndpoints.push("http://127.0.0.1:8000/api/verify-message");
           candidateEndpoints.push("http://localhost:8000/api/verify-message");
-          candidateEndpoints.push(`${DEFAULT_CLOUD_URL}/api/verify-message`);
         }
 
         let data = null;

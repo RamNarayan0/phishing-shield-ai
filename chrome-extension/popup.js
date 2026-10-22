@@ -1,11 +1,39 @@
 // popup.js - Phishing Shield AI Chrome Extension
 
 // Load settings on startup
-chrome.storage.local.get(["apiUrl"], (res) => {
+chrome.storage.local.get(["apiUrl"], async (res) => {
   const modeSelect = document.getElementById("apiMode");
-  const badge = document.getElementById("envBadge");
-  if (res.apiUrl) {
-    modeSelect.value = res.apiUrl;
+  let currentUrl = res.apiUrl;
+
+  if (!currentUrl) {
+    try {
+      const configRes = await fetch(chrome.runtime.getURL("config.json"));
+      if (configRes.ok) {
+        const cfg = await configRes.json();
+        if (cfg && cfg.apiUrl) {
+          currentUrl = cfg.apiUrl;
+          chrome.storage.local.set({ apiUrl: currentUrl });
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (currentUrl) {
+    let matched = false;
+    for (let i = 0; i < modeSelect.options.length; i++) {
+      if (modeSelect.options[i].value === currentUrl) {
+        modeSelect.selectedIndex = i;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched && currentUrl !== "auto") {
+      const customOpt = document.createElement("option");
+      customOpt.value = currentUrl;
+      customOpt.textContent = `Configured Backend (${currentUrl})`;
+      modeSelect.insertBefore(customOpt, modeSelect.firstChild);
+      modeSelect.value = currentUrl;
+    }
   }
   updateBadge(modeSelect.value);
 });
@@ -23,10 +51,14 @@ document.getElementById("toggleSettings").addEventListener("click", () => {
 
 function updateBadge(val) {
   const badge = document.getElementById("envBadge");
-  if (val === "http://127.0.0.1:8000") {
+  if (!val || val === "http://127.0.0.1:8000" || val === "http://localhost:8000") {
     badge.textContent = "Local Dev";
     badge.style.borderColor = "#64748b";
     badge.style.color = "#94a3b8";
+  } else if (val.includes("100.") || val.includes(".ts.net") || val.includes("tailscale")) {
+    badge.textContent = "Tailscale";
+    badge.style.borderColor = "#10b981";
+    badge.style.color = "#34d399";
   } else {
     badge.textContent = "Cloud AI";
     badge.style.borderColor = "#0284c7";

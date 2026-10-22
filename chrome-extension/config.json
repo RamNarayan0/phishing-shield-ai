@@ -1,0 +1,4 @@
+{
+  "apiUrl": "https://reference-centered-por-agree.trycloudflare.com",
+  "notes": "Configured by install.ps1. Supports Tailscale IP (e.g. http://100.x.y.z:8000) or public Cloud URLs."
+}
