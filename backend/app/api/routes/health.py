@@ -1,12 +1,14 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Dict
+from typing import Dict, Any, Optional
+from ...db.mongodb import check_health, is_connected, MONGODB_DATABASE
 
 router = APIRouter()
 
 class HealthResponse(BaseModel):
     status: str
     version: str
+    database: Optional[Dict[str, Any]] = None
 
 @router.get("/")
 def root():
@@ -14,11 +16,16 @@ def root():
 
 @router.get("/health", response_model=HealthResponse)
 def health_check():
-    return HealthResponse(status="ok", version="1.0.0")
+    db_health = check_health()
+    return HealthResponse(
+        status="ok",
+        version="1.0.0",
+        database=db_health
+    )
 
 @router.get("/api/system-status")
 def system_status():
-    from ...db.mongodb import is_connected, MONGODB_DB_NAME
+    db_health = check_health()
     db_connected = is_connected()
     return {
         "status": "ONLINE",
@@ -29,6 +36,7 @@ def system_status():
             "url_engine": "ok",
             "risk_engine": "ok",
             "event_ingestion": "ok",
-            "database": "connected (MongoDB: " + MONGODB_DB_NAME + ")" if db_connected else "fallback (in-memory)"
-        }
+            "database": f"connected (MongoDB: {MONGODB_DATABASE})" if db_connected else "fallback (in-memory)"
+        },
+        "database_metrics": db_health
     }

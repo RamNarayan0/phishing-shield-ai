@@ -154,3 +154,119 @@ def test_email_display_name_spoofing():
     assert data["verdict"] in ["HIGH RISK", "CRITICAL"]
     assert any("spoofing" in r.lower() for r in data["reasons"])
 
+def test_explainable_breakdown_structure_and_safe_message():
+    payload = {
+        "raw_text": "Hey bro, let's catch up tomorrow for lunch at the usual spot.",
+        "source_platform": "web"
+    }
+    response = client.post("/api/verify-message", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "explanation" in data
+    expl = data["explanation"]
+    assert expl is not None
+    assert "summary" in expl
+    assert "signals" in expl
+    assert "categories" in expl
+    assert "recommended_action" in expl
+
+    # Check categories
+    cats = expl["categories"]
+    assert "message_content" in cats
+    assert "url_structure" in cats
+    assert "ml_evidence" in cats
+    assert "sender_identity" in cats
+
+    # In safe text without URL, url_structure is unavailable and message_content is clean
+    assert cats["url_structure"]["status"] == "unavailable"
+    assert cats["message_content"]["status"] == "clean"
+
+    # Signals structure
+    for sig in expl["signals"]:
+        assert "signal_id" in sig
+        assert "category" in sig
+        assert "label" in sig
+        assert "status" in sig
+        assert sig["status"] in ["detected", "not_detected", "unavailable"]
+        assert "severity" in sig
+        assert "description" in sig
+        assert "contribution" in sig
+
+def test_explainable_breakdown_phishing_with_url():
+    payload = {
+        "raw_text": "URGENT: Your bank account has been suspended. Verify immediately at: https://example-bank-login.com",
+        "source_platform": "web"
+    }
+    response = client.post("/api/verify-message", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    expl = data.get("explanation")
+    assert expl is not None
+    cats = expl["categories"]
+
+    # Should detect urgency and url structure
+    assert cats["message_content"]["status"] == "detected"
+    assert cats["url_structure"]["status"] == "detected"
+    assert cats["message_content"]["detected_count"] >= 1
+    assert cats["url_structure"]["detected_count"] >= 1
+
+    # Check that at least one signal in url_structure has status 'detected'
+    url_signals = [s for s in expl["signals"] if s["category"] == "url_structure" and s["status"] == "detected"]
+    assert len(url_signals) > 0
+    assert "CRITICAL" in expl["summary"] or "HIGH RISK" in expl["summary"]
+
+def test_explainable_breakdown_sender_unavailable_when_missing():
+    payload = {
+        "raw_text": "Test message without sender header.",
+        "source_platform": "web"
+    }
+    response = client.post("/api/verify-message", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    expl = data.get("explanation")
+    assert expl is not None
+    sender_sig = next((s for s in expl["signals"] if s["signal_id"] == "sender_impersonation"), None)
+    assert sender_sig is not None
+    assert sender_sig["status"] == "unavailable"
+
+def test_explainable_breakdown_empty_input():
+    payload = {
+        "raw_text": "",
+        "source_platform": "web"
+    }
+    response = client.post("/api/verify-message", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] == "SAFE"
+    expl = data.get("explanation")
+    assert expl is not None
+    assert "SAFE" in expl["summary"]
+    assert expl["categories"]["url_structure"]["status"] == "unavailable"
+
+def test_explainable_breakdown_ml_inactive():
+    from app.core.risk_engine import RiskEngine
+    text_analysis = {"risk_score": 0, "signals": []}
+    sender_analysis = {"sender": "", "risk_score": 0, "signals": []}
+    result = RiskEngine.calculate_verdict(
+        text_analysis=text_analysis,
+        url_analyses=[],
+        sender_analysis=sender_analysis,
+        ml_analysis={"active": False, "ml_score": 0}
+    )
+    assert "explanation" in result
+    ml_sig = next((s for s in result["explanation"]["signals"] if s["signal_id"] == "ml_text_classifier"), None)
+    assert ml_sig is not None
+    assert ml_sig["status"] == "unavailable"
+    assert result["explanation"]["categories"]["ml_evidence"]["status"] == "unavailable"
+
+def test_explainable_breakdown_score_consistency():
+    payload = {
+        "raw_text": "URGENT: Your PayPal account is frozen. Pay fee immediately: https://paypa1-security.com",
+        "sender_id": "service@paypa1-security.com"
+    }
+    response = client.post("/api/verify-message", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    expl = data["explanation"]
+    assert str(data["risk_score"]) in expl["summary"]
+    assert data["verdict"] in expl["summary"]

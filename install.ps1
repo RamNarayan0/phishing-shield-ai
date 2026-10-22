@@ -5,7 +5,7 @@
     This script installs the Phishing Shield AI Chrome extension into the user's LOCALAPPDATA
     directory, validates all required files and Manifest V3 structure, configures the backend
     API endpoint (Tailscale IP, Cloud, or custom), and guides the user through loading it in Chrome.
-    
+
     Security Guarantees:
     - Never requires or prompts for Administrator privileges.
     - Never disables or modifies Windows Defender, antivirus, or security settings.
@@ -115,7 +115,7 @@ Write-Host "[*] Target installation directory: $InstallPath" -ForegroundColor Gr
 # ------------------------------------------------------------------------------
 # 3. BACKEND API & TAILSCALE CONFIGURATION
 # ------------------------------------------------------------------------------
-$DEFAULT_CLOUD_URL = "https://reference-centered-por-agree.trycloudflare.com"
+$DEFAULT_CLOUD_URL = "https://phishing-shield-ai-backend.onrender.com"
 
 if (-not $BackendUrl -or $BackendUrl.Trim() -eq "") {
     if ($NonInteractive) {
@@ -171,17 +171,26 @@ try {
         New-Item -ItemType Directory -Path $InstallPath -Force | Out-Null
     }
 
-    $localExtensionDir = Join-Path $PSScriptRoot "chrome-extension"
-    if (Test-Path (Join-Path $localExtensionDir "manifest.json")) {
+    $hasLocalSource = $false
+    $localExtensionDir = $null
+    if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot "chrome-extension\manifest.json"))) {
+        $hasLocalSource = $true
+        $localExtensionDir = Join-Path $PSScriptRoot "chrome-extension"
+    } elseif (Test-Path "chrome-extension\manifest.json") {
+        $hasLocalSource = $true
+        $localExtensionDir = (Resolve-Path "chrome-extension").Path
+    }
+
+    if ($hasLocalSource -and $localExtensionDir) {
         Write-Host "[*] Copying extension files from repository source..." -ForegroundColor Cyan
         Copy-Item -Path "$localExtensionDir\*" -Destination $InstallPath -Recurse -Force
     } else {
         Write-Host "[*] Downloading verified extension release from: $DownloadUrl..." -ForegroundColor Cyan
         $tempZip = Join-Path $env:TEMP "phishing-shield-ai-$([System.Guid]::NewGuid().ToString('N')).zip"
-        
+
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
         Invoke-WebRequest -Uri $DownloadUrl -OutFile $tempZip -UseBasicParsing
-        
+
         Write-Host "[*] Extracting package to target directory..." -ForegroundColor Cyan
         Expand-Archive -Path $tempZip -DestinationPath $InstallPath -Force
         Remove-Item -Path $tempZip -Force -ErrorAction SilentlyContinue

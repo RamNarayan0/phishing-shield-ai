@@ -134,30 +134,39 @@ document.getElementById('scanBtn').addEventListener('click', async () => {
             <div style="font-size:24px; font-weight:900; color:${color}; font-family:monospace;">${score} <span style="font-size:12px; color:#64748b;">/ 100</span></div>
           </div>`;
 
+          function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[m]));
+          }
+
           if (senderVal) {
-            html += `<div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Sender: <b style="color:#f1f5f9;">${senderVal}</b></div>`;
+            html += `<div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Sender: <b style="color:#f1f5f9;">${escapeHtml(senderVal)}</b></div>`;
           }
 
           if (phones.length > 0) {
-            html += `<div style="font-size:10px; color:#f59e0b; margin-bottom:4px;">📱 Phones: <b>${phones.join(', ')}</b></div>`;
+            html += `<div style="font-size:10px; color:#f59e0b; margin-bottom:4px;">📱 Phones: <b>${escapeHtml(phones.join(', '))}</b></div>`;
           }
 
           if (emails.length > 0) {
-            html += `<div style="font-size:10px; color:#a855f7; margin-bottom:4px;">📧 Emails: <b>${emails.join(', ')}</b></div>`;
+            html += `<div style="font-size:10px; color:#a855f7; margin-bottom:4px;">📧 Emails: <b>${escapeHtml(emails.join(', '))}</b></div>`;
           }
 
           if (reasons.length > 0) {
             html += `<div style="font-size:11px; color:#cbd5e1; border-top:1px solid #1e293b; padding-top:6px; margin-top:4px;">`;
             html += `<b>Detected Signals:</b><ul style="margin:4px 0; padding-left:14px;">`;
             reasons.forEach(reason => {
-              html += `<li style="margin-bottom:2px; font-size:10.5px; color:#cbd5e1;">${reason}</li>`;
+              html += `<li style="margin-bottom:2px; font-size:10.5px; color:#cbd5e1;">${escapeHtml(reason)}</li>`;
             });
             html += `</ul></div>`;
           }
 
+          if (r.explanation && r.explanation.summary) {
+            html += `<div style="font-size:10px; color:#94a3b8; background:#0f172a; padding:6px; border-radius:4px; margin-top:6px; border-left:3px solid ${color}; line-height:1.4;">${escapeHtml(r.explanation.summary)}</div>`;
+          }
+
           if (r.recommended_action) {
             let actionText = r.recommended_action.replace(/_/g, ' ');
-            html += `<div style="font-size:11px; color:${color}; font-weight:bold; margin-top:6px; text-transform:uppercase; letter-spacing:0.5px;">Recommendation: ${actionText}</div>`;
+            html += `<div style="font-size:11px; color:${color}; font-weight:bold; margin-top:6px; text-transform:uppercase; letter-spacing:0.5px;">Recommendation: ${escapeHtml(actionText)}</div>`;
           }
 
           statusEl.innerHTML = html;

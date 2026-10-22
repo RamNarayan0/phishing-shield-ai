@@ -1,5 +1,104 @@
 import { useState, useEffect, useRef } from 'react'
-import { Shield, ShieldAlert, ShieldCheck, AlertTriangle, Smartphone, Chrome, Mail, Phone, Database, Server, Activity, CheckCircle2 } from 'lucide-react'
+import { Shield, ShieldAlert, ShieldCheck, AlertTriangle, Smartphone, Chrome, Mail, Phone, Database, Server, Activity, CheckCircle2, HelpCircle, Info } from 'lucide-react'
+
+function RiskBreakdownSection({ explanation, riskScore }) {
+  if (!explanation) return null;
+
+  return (
+    <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 space-y-4">
+      <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+          <HelpCircle size={14} className="text-blue-400" />
+          Explainable Phishing Risk Breakdown
+        </h3>
+        <span className="text-[10px] text-slate-500 font-mono">Detection Evidence</span>
+      </div>
+
+      {/* Analysis Summary */}
+      <div className="bg-slate-900/80 border border-slate-800 rounded p-3 text-xs text-slate-300 leading-relaxed break-words">
+        <span className="font-semibold text-slate-200">Analysis Summary: </span>
+        {explanation.summary}
+      </div>
+
+      {/* Category Status Overview */}
+      {explanation.categories && (
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          {Object.entries(explanation.categories).map(([key, cat]) => {
+            const statusConfig = {
+              detected: { bg: 'bg-red-950/40 border-red-800/60 text-red-300', dot: 'bg-red-500', label: `${cat.detected_count} Detected` },
+              clean: { bg: 'bg-emerald-950/30 border-emerald-800/50 text-emerald-300', dot: 'bg-emerald-500', label: 'Clean' },
+              unavailable: { bg: 'bg-slate-900/60 border-slate-800 text-slate-500', dot: 'bg-slate-600', label: 'Not Present' }
+            }[cat.status] || { bg: 'bg-slate-900 text-slate-400', dot: 'bg-slate-500', label: cat.status };
+
+            return (
+              <div key={key} className={`p-2.5 rounded border flex flex-col justify-between gap-1.5 ${statusConfig.bg}`}>
+                <div className="text-[11px] font-bold truncate text-slate-200">{cat.title}</div>
+                <div className="flex items-center gap-1.5 text-[10px] font-mono">
+                  <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`}></span>
+                  <span>{statusConfig.label}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Granular Evidence Signals */}
+      {explanation.signals && explanation.signals.length > 0 && (
+        <div className="space-y-2 pt-1">
+          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            Evaluated Threat Signals ({explanation.signals.filter(s => s.status === 'detected').length} Triggered)
+          </div>
+          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+            {explanation.signals.map((sig, idx) => {
+              const badgeStyle = {
+                detected: 'bg-red-950/70 border-red-800 text-red-300',
+                not_detected: 'bg-emerald-950/50 border-emerald-800 text-emerald-300',
+                unavailable: 'bg-slate-900 border-slate-800 text-slate-500'
+              }[sig.status] || 'bg-slate-900 border-slate-800 text-slate-400';
+
+              const statusText = {
+                detected: 'DETECTED',
+                not_detected: 'NOT DETECTED',
+                unavailable: 'N/A'
+              }[sig.status] || sig.status.toUpperCase();
+
+              return (
+                <div key={idx} className="bg-slate-900 border border-slate-800/90 rounded p-2.5 text-xs flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-slate-200">{sig.label}</span>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {sig.contribution > 0 && (
+                        <span className="text-[10px] font-mono text-amber-400 bg-amber-950/60 border border-amber-900/60 px-1.5 py-0.5 rounded">
+                          +{sig.contribution} pts
+                        </span>
+                      )}
+                      <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border uppercase ${badgeStyle}`}>
+                        {statusText}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-normal break-words">{sig.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Recommended Action Guidance */}
+      {explanation.recommended_action && (
+        <div className="bg-blue-950/30 border border-blue-900/50 rounded p-2.5 text-xs text-blue-200 flex items-start gap-2">
+          <Info size={14} className="text-blue-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <span className="font-bold text-blue-300">Recommended Step: </span>
+            <span>{explanation.recommended_action}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState('stream')
@@ -9,8 +108,23 @@ function App() {
   const [events, setEvents] = useState([])
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [stats, setStats] = useState({ total: 0, safe: 0, suspicious: 0, high: 0, critical: 0 })
+  const [stats, setStats] = useState({ total: 0, safe: 0, suspicious: 0, high: 0, critical: 0, unknown: 0 })
   
+  // Reconciled statistics calculation matching authoritative 4-tier risk engine model
+  const calculateStats = (eventList) => {
+    const s = { total: eventList.length, safe: 0, suspicious: 0, high: 0, critical: 0, unknown: 0 };
+    eventList.forEach(evt => {
+      const score = evt.result?.risk_score ?? -1;
+      const verdict = (evt.result?.verdict || '').toUpperCase();
+      if (score >= 80 || verdict === 'CRITICAL') s.critical++;
+      else if (score >= 60 || verdict === 'HIGH RISK' || verdict === 'HIGH') s.high++;
+      else if (score >= 30 || verdict === 'SUSPICIOUS') s.suspicious++;
+      else if (score >= 0 || verdict === 'SAFE') s.safe++;
+      else s.unknown++;
+    });
+    return s;
+  };
+
   // Ref to automatically scroll to the latest event
   const streamEndRef = useRef(null)
   
@@ -21,7 +135,7 @@ function App() {
   const [apiUrl, setApiUrl] = useState(() => localStorage.getItem('phishing_api_url') || defaultApi)
   const [backendOnline, setBackendOnline] = useState(false)
 
-  // Poll the backend for new events every 2 seconds
+  // Poll backend for new events every 2 seconds and merge idempotently
   useEffect(() => {
     let isMounted = true;
     const fetchEvents = async () => {
@@ -30,19 +144,19 @@ function App() {
         if (res.ok) {
           const data = await res.json();
           if (!isMounted) return;
-          setEvents(data.events || []);
+          const remoteEvents = data.events || [];
+          setEvents(remoteEvents);
           setBackendOnline(true);
-          
-          // Recompute stats
-          const s = { total: 0, safe: 0, suspicious: 0, high: 0, critical: 0 };
-          (data.events || []).forEach(evt => {
-            s.total++;
-            if (evt.result.risk_score >= 80) s.critical++;
-            else if (evt.result.risk_score >= 60) s.high++;
-            else if (evt.result.risk_score >= 30) s.suspicious++;
-            else s.safe++;
+          setStats(calculateStats(remoteEvents));
+
+          setSelectedEvent(prev => {
+            if (!prev && remoteEvents.length > 0) return remoteEvents[0];
+            if (prev) {
+              const matched = remoteEvents.find(e => (e.fingerprint && e.fingerprint === prev.fingerprint) || e.id === prev.id);
+              if (matched) return matched;
+            }
+            return prev;
           });
-          setStats(s);
         } else {
           if (isMounted) setBackendOnline(false);
         }
@@ -60,7 +174,7 @@ function App() {
   }, [apiUrl]);
 
   const analyzeManual = async () => {
-    if (!manualText.trim()) return;
+    if (!manualText.trim() || loading) return;
     setLoading(true)
     try {
       const endpoint = `${apiUrl}/api/verify-message`
@@ -81,58 +195,121 @@ function App() {
   }
 
   const analyzeEvent = async (rawText, source = 'Android Notification', app = 'WhatsApp', sender = 'Unknown Contact') => {
-    setLoading(true)
+    if (loading) return; // Prevent double submission
+    setLoading(true);
     try {
-      const endpoint = `${apiUrl}/api/verify-message`
-      
+      const endpoint = `${apiUrl}/api/verify-message`;
       const payload = {
         raw_text: rawText,
         source_platform: source,
         sender_id: sender
-      }
+      };
 
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      })
+      });
 
-      if (!response.ok) throw new Error('API request failed')
-      
-      const data = await response.json()
-      
-      const newEvent = {
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-        timestamp: new Date().toLocaleTimeString(),
-        source_platform: source,
-        application_name: app,
-        sender_id: sender,
-        raw_text: rawText,
-        result: data
-      }
+      if (!response.ok) throw new Error('API request failed');
+      const data = await response.json();
 
-      setEvents(prev => [...prev, newEvent])
-      setSelectedEvent(newEvent)
-      
-      // Update stats
-      setStats(prev => {
-        const s = { ...prev, total: prev.total + 1 }
-        if (data.risk_score >= 80) s.critical++
-        else if (data.risk_score >= 60) s.high++
-        else if (data.risk_score >= 30) s.suspicious++
-        else s.safe++
-        return s
-      })
+      const normText = (rawText || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      const normSender = (sender || '').trim().toLowerCase();
+      const normSource = (source || '').trim().toLowerCase();
+
+      setEvents(prev => {
+        // Check if event already exists in live stream
+        const existingIdx = prev.findIndex(e => {
+          const eText = (e.raw_text || '').trim().toLowerCase().replace(/\s+/g, ' ');
+          const eSender = (e.sender_id || '').trim().toLowerCase();
+          const eSource = (e.source_platform || '').trim().toLowerCase();
+          return eText === normText && eSender === normSender && eSource === normSource;
+        });
+
+        if (existingIdx !== -1) {
+          const updated = [...prev];
+          const prevEvt = updated[existingIdx];
+          const merged = {
+            ...prevEvt,
+            timestamp: new Date().toLocaleTimeString(),
+            duplicate_count: (prevEvt.duplicate_count || 1) + 1,
+            result: data
+          };
+          updated.splice(existingIdx, 1);
+          updated.unshift(merged);
+          setSelectedEvent(merged);
+          setStats(calculateStats(updated));
+          return updated;
+        } else {
+          const newEvt = {
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+            timestamp: new Date().toLocaleTimeString(),
+            source_platform: source,
+            application_name: app,
+            sender_id: sender,
+            raw_text: rawText,
+            duplicate_count: 1,
+            result: data
+          };
+          const updated = [newEvt, ...prev];
+          setSelectedEvent(newEvt);
+          setStats(calculateStats(updated));
+          return updated;
+        }
+      });
 
     } catch (err) {
-      console.error("Analysis Error: ", err)
+      console.error("Analysis Error: ", err);
     } finally {
-      setLoading(false)
+      setLoading(false);
       setTimeout(() => {
-        streamEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-      }, 100)
+        streamEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     }
   }
+
+  const handleResetDemoData = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${apiUrl}/api/admin/reset-demo-data`, { method: 'POST' });
+      if (res.ok) {
+        const evRes = await fetch(`${apiUrl}/api/events`);
+        if (evRes.ok) {
+          const d = await evRes.json();
+          const list = d.events || [];
+          setEvents(list);
+          setStats(calculateStats(list));
+          if (list.length > 0) setSelectedEvent(list[0]);
+        }
+      }
+    } catch (e) {
+      console.error('Reset demo data failed:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCleanDuplicates = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${apiUrl}/api/admin/cleanup-duplicates?dry_run=false`, { method: 'POST' });
+      if (res.ok) {
+        const evRes = await fetch(`${apiUrl}/api/events`);
+        if (evRes.ok) {
+          const d = await evRes.json();
+          const list = d.events || [];
+          setEvents(list);
+          setStats(calculateStats(list));
+        }
+      }
+    } catch (e) {
+      console.error('Clean duplicates failed:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const presets = [
     { label: "NORMAL MESSAGE (SAFE)", app: "WhatsApp", sender: "+91 98480 12345", text: "Hey, are you coming to college tomorrow? Let's meet near the library at 10 AM." },
@@ -243,6 +420,12 @@ function App() {
                   {manualResult.risk_score} <span className="text-sm text-slate-500">/ 100</span>
                 </div>
               </div>
+
+              {/* Explainable Risk Breakdown */}
+              <div className="mb-4">
+                <RiskBreakdownSection explanation={manualResult.explanation} riskScore={manualResult.risk_score} />
+              </div>
+
               <div className="bg-slate-950 border border-slate-800 rounded p-4 mb-4">
                 <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Detected Signals</h3>
                 {manualResult.reasons.length > 0 ? (
@@ -343,10 +526,52 @@ function App() {
           <div className="pt-6 border-t border-slate-800">
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Live Statistics</h3>
             <div className="grid grid-cols-2 gap-2 text-center text-xs font-bold">
-              <div className="bg-slate-950 p-2 rounded border border-slate-800">TOTAL: {stats.total}</div>
-              <div className="bg-emerald-950/30 text-emerald-500 p-2 rounded border border-emerald-900/50">SAFE: {stats.safe}</div>
-              <div className="bg-yellow-950/30 text-yellow-500 p-2 rounded border border-yellow-900/50">SUSP: {stats.suspicious}</div>
-              <div className="bg-red-950/30 text-red-500 p-2 rounded border border-red-900/50">CRIT: {stats.critical}</div>
+              <div className="col-span-2 bg-slate-950 p-2.5 rounded border border-slate-800 flex justify-between items-center px-4 shadow-sm">
+                <span className="text-slate-400 uppercase tracking-widest text-[11px]">Total Analyzed</span>
+                <span className="font-mono text-base text-slate-100 font-black">{stats.total}</span>
+              </div>
+              <div className="bg-emerald-950/30 text-emerald-400 p-2 rounded border border-emerald-900/50 flex justify-between items-center px-3">
+                <span className="tracking-wider">SAFE:</span>
+                <span className="font-mono text-slate-200">{stats.safe}</span>
+              </div>
+              <div className="bg-yellow-950/30 text-yellow-400 p-2 rounded border border-yellow-900/50 flex justify-between items-center px-3">
+                <span className="tracking-wider">SUSP:</span>
+                <span className="font-mono text-slate-200">{stats.suspicious}</span>
+              </div>
+              <div className="bg-orange-950/30 text-orange-400 p-2 rounded border border-orange-900/50 flex justify-between items-center px-3">
+                <span className="tracking-wider">HIGH:</span>
+                <span className="font-mono text-slate-200">{stats.high}</span>
+              </div>
+              <div className="bg-red-950/30 text-red-400 p-2 rounded border border-red-900/50 flex justify-between items-center px-3">
+                <span className="tracking-wider">CRIT:</span>
+                <span className="font-mono text-slate-200">{stats.critical}</span>
+              </div>
+              {stats.unknown > 0 && (
+                <div className="col-span-2 bg-slate-900 text-slate-400 p-1.5 rounded border border-slate-800 flex justify-between items-center px-3 text-[11px]">
+                  <span>UNCLASSIFIED:</span>
+                  <span className="font-mono">{stats.unknown}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Maintenance Controls */}
+            <div className="pt-4 mt-4 border-t border-slate-800/80 flex flex-col gap-2">
+              <button
+                onClick={handleCleanDuplicates}
+                disabled={loading}
+                className="w-full py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-semibold border border-slate-700 flex justify-center items-center gap-1.5 transition-all"
+                title="Audits and consolidates redundant duplicate records in MongoDB"
+              >
+                <span>Audit & Deduplicate Records</span>
+              </button>
+              <button
+                onClick={handleResetDemoData}
+                disabled={loading}
+                className="w-full py-1.5 px-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded text-[11px] font-semibold border border-slate-800 flex justify-center items-center gap-1.5 transition-all"
+                title="Resets database to 9 pristine canonical preset scenarios (backup created automatically)"
+              >
+                <span>Reset Demo Scenarios</span>
+              </button>
             </div>
           </div>
         </div>
@@ -364,34 +589,47 @@ function App() {
                 <p className="text-sm font-semibold uppercase tracking-widest">Waiting for events...</p>
               </div>
             ) : (
-              events.map((evt) => (
-                <div 
-                  key={evt.id} 
-                  onClick={() => setSelectedEvent(evt)}
-                  className={`p-3 rounded border cursor-pointer transition-all ${
-                    selectedEvent?.id === evt.id ? 'bg-slate-800 border-blue-500 shadow-lg' : 'bg-slate-900 border-slate-800 hover:border-slate-600'
-                  }`}
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${getRiskBg(evt.result.risk_score)}`}></div>
-                      <span className="text-xs font-bold text-slate-300">{evt.application_name}</span>
+              events.map((evt, idx) => {
+                const isSelected = selectedEvent?.id === evt.id || (selectedEvent?.fingerprint && selectedEvent.fingerprint === evt.fingerprint);
+                const dupCount = evt.duplicate_count || 1;
+                return (
+                  <div
+                    key={evt.fingerprint || evt.id || `stream-evt-${idx}`}
+                    onClick={() => setSelectedEvent(evt)}
+                    className={`p-3 rounded border cursor-pointer transition-all ${
+                      isSelected ? 'bg-slate-800 border-blue-500 shadow-lg' : 'bg-slate-900 border-slate-800 hover:border-slate-600'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${getRiskBg(evt.result.risk_score)}`}></div>
+                        <span className="text-xs font-bold text-slate-300">{evt.application_name}</span>
+                        {dupCount > 1 && (
+                          <span
+                            className="text-[10px] bg-blue-950/80 text-blue-300 border border-blue-800/80 px-1.5 py-0.5 rounded font-mono font-bold"
+                            title={`${dupCount} identical submissions detected and merged`}
+                          >
+                            ×{dupCount}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-500 font-mono">{evt.timestamp}</span>
                     </div>
-                    <span className="text-xs text-slate-500 font-mono">{evt.timestamp}</span>
+                    <p className="text-sm text-slate-400 line-clamp-2 italic mb-2">"{evt.raw_text}"</p>
+                    <div className="flex justify-between items-center">
+                      <span className={`text-xs font-bold tracking-widest ${getRiskColor(evt.result.risk_score)}`}>
+                        {evt.result.verdict}
+                      </span>
+                      <span className="text-xs font-mono text-slate-500">{evt.result.risk_score}/100</span>
+                    </div>
                   </div>
-                  <p className="text-sm text-slate-400 line-clamp-2 italic mb-2">"{evt.raw_text}"</p>
-                  <div className="flex justify-between items-center">
-                    <span className={`text-xs font-bold tracking-widest ${getRiskColor(evt.result.risk_score)}`}>
-                      {evt.result.verdict}
-                    </span>
-                    <span className="text-xs font-mono text-slate-500">{evt.result.risk_score}/100</span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
             <div ref={streamEndRef} />
           </div>
         </div>
+
 
         {/* RIGHT PANEL: SELECTED EVENT & SYSTEM STATUS */}
         <div className="lg:col-span-4 bg-slate-900 flex flex-col h-full overflow-hidden">
@@ -447,6 +685,9 @@ function App() {
                     "{selectedEvent.raw_text}"
                   </div>
                 </div>
+
+                {/* EXPLAINABLE RISK BREAKDOWN */}
+                <RiskBreakdownSection explanation={selectedEvent.result.explanation} riskScore={selectedEvent.result.risk_score} />
 
                 {/* REASONS */}
                 <div>
