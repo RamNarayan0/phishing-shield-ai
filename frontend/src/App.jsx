@@ -131,7 +131,7 @@ function App() {
   const defaultApi = import.meta.env.VITE_API_URL || 
     (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? 'http://127.0.0.1:8000'
-      : 'https://stick-sharon-meet-cycling.trycloudflare.com')
+      : 'https://raw-hunter-trusted-movements.trycloudflare.com')
   const [apiUrl, setApiUrl] = useState(() => localStorage.getItem('phishing_api_url') || defaultApi)
   const [backendOnline, setBackendOnline] = useState(false)
 
@@ -372,7 +372,7 @@ function App() {
               }}
               className="bg-transparent text-slate-300 font-mono text-[11px] outline-none cursor-pointer"
             >
-              <option value="https://stick-sharon-meet-cycling.trycloudflare.com" className="bg-slate-900 text-slate-200">Live Public Cloud API</option>
+              <option value="https://raw-hunter-trusted-movements.trycloudflare.com" className="bg-slate-900 text-slate-200">Live Public Cloud API</option>
               <option value="http://127.0.0.1:8000" className="bg-slate-900 text-slate-200">Local (127.0.0.1:8000)</option>
               <option value="https://phishing-shield-ai-backend.onrender.com" className="bg-slate-900 text-slate-200">Render Cloud API</option>
             </select>
