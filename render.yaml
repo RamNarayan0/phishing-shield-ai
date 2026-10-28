@@ -10,10 +10,18 @@ services:
         value: 3.11.9
       - key: MONGODB_URI
         sync: false
-      - key: MONGODB_DB_NAME
+      - key: MONGODB_DATABASE
         value: phishing_shield_ai
       - key: MONGODB_COLLECTION
         value: analysis_history
+      - key: MAX_REQUEST_SIZE_BYTES
+        value: "262144"
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "60"
+      - key: ADMIN_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://ramnarayan0.github.io,https://phishing-shield-ai.vercel.app,https://phishing-shield-ai-frontend.onrender.com
 
   - type: web
     name: phishing-shield-ai-frontend
