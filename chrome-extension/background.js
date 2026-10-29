@@ -1,6 +1,6 @@
 // background.js - Phishing Shield AI Chrome Extension (Cloud, Tailscale & Local Support)
 
-const DEFAULT_CLOUD_URL = "https://reference-centered-por-agree.trycloudflare.com";
+const DEFAULT_CLOUD_URL = "https://supplemental-work-qty-yeast.trycloudflare.com";
 
 async function resolveDefaultApiUrl() {
   try {

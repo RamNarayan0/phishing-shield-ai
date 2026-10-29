@@ -1,4 +1,4 @@
 {
-  "apiUrl": "http://127.0.0.1:8000",
-  "notes": "Configured for local development. Backend running on http://127.0.0.1:8000"
+  "apiUrl": "https://supplemental-work-qty-yeast.trycloudflare.com",
+  "notes": "Live Cloud API URL via secure Cloudflare tunnel"
 }

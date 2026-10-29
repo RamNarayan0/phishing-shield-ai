@@ -39,6 +39,7 @@ else:
         "http://127.0.0.1:8000",
         "https://ramnarayan0.github.io",
         "https://phishing-shield-ai.vercel.app",
+        "https://phishing-shield-ai-web.vercel.app",
         "https://phishing-shield-ai-frontend.onrender.com",
         "https://phishing-shield-ai.onrender.com"
     ]
