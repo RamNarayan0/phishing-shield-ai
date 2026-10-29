@@ -128,11 +128,20 @@ function App() {
   // Ref to automatically scroll to the latest event
   const streamEndRef = useRef(null)
   
-  const defaultApi = import.meta.env.VITE_API_URL || 
-    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-      ? 'http://127.0.0.1:8000'
-      : 'https://supplemental-work-qty-yeast.trycloudflare.com')
-  const [apiUrl, setApiUrl] = useState(() => localStorage.getItem('phishing_api_url') || defaultApi)
+  const ACTIVE_CLOUD_API = 'https://supplemental-work-qty-yeast.trycloudflare.com';
+  const defaultApi = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+    ? 'http://127.0.0.1:8000'
+    : ACTIVE_CLOUD_API;
+
+  const [apiUrl, setApiUrl] = useState(() => {
+    if (typeof window === 'undefined') return defaultApi;
+    const stored = localStorage.getItem('phishing_api_url');
+    if (!stored || stored.includes('raw-hunter') || stored.includes('reference-centered') || stored.includes('trycloudflare.com') && !stored.includes('supplemental-work')) {
+      localStorage.setItem('phishing_api_url', defaultApi);
+      return defaultApi;
+    }
+    return stored;
+  });
   const [backendOnline, setBackendOnline] = useState(false)
 
   // Poll backend for new events every 2 seconds and merge idempotently
