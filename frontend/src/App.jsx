@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Shield, ShieldAlert, ShieldCheck, AlertTriangle, Smartphone, Chrome, Mail, Phone, Database, Server, Activity, CheckCircle2, HelpCircle, Info } from 'lucide-react'
+import { Shield, ShieldAlert, ShieldCheck, AlertTriangle, Smartphone, Chrome, Mail, Phone, Database, Server, Activity, CheckCircle2, HelpCircle, Info, Trash2 } from 'lucide-react'
 
 function RiskBreakdownSection({ explanation, riskScore }) {
   if (!explanation) return null;
@@ -310,6 +310,22 @@ function App() {
     }
   };
 
+  const handleClearAllEvents = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${apiUrl}/api/admin/clear-all-events`, { method: 'POST' });
+      if (res.ok) {
+        setEvents([]);
+        setSelectedEvent(null);
+        setStats({ total: 0, safe: 0, suspicious: 0, high: 0, critical: 0, unknown: 0 });
+      }
+    } catch (e) {
+      console.error('Clear all events failed:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const presets = [
     { label: "NORMAL MESSAGE (SAFE)", app: "WhatsApp", sender: "+91 98480 12345", text: "Hey, are you coming to college tomorrow? Let's meet near the library at 10 AM." },
@@ -589,20 +605,21 @@ function App() {
             {/* Maintenance Controls */}
             <div className="pt-4 mt-4 border-t border-slate-800/80 flex flex-col gap-2">
               <button
+                onClick={handleClearAllEvents}
+                disabled={loading || events.length === 0}
+                className="w-full py-1.5 px-2 bg-red-950/40 hover:bg-red-900/50 text-red-300 rounded text-[11px] font-semibold border border-red-800/60 flex justify-center items-center gap-1.5 transition-all disabled:opacity-40"
+                title="Wipes all mock/preset events and duplicate records from the database"
+              >
+                <Trash2 size={12} className="text-red-400" />
+                <span>Clear All Threat Events</span>
+              </button>
+              <button
                 onClick={handleCleanDuplicates}
                 disabled={loading}
                 className="w-full py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-semibold border border-slate-700 flex justify-center items-center gap-1.5 transition-all"
                 title="Audits and consolidates redundant duplicate records in MongoDB"
               >
-                <span>Audit & Deduplicate Records</span>
-              </button>
-              <button
-                onClick={handleResetDemoData}
-                disabled={loading}
-                className="w-full py-1.5 px-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded text-[11px] font-semibold border border-slate-800 flex justify-center items-center gap-1.5 transition-all"
-                title="Resets database to 9 pristine canonical preset scenarios (backup created automatically)"
-              >
-                <span>Reset Demo Scenarios</span>
+                <span>Audit & Deduplicate</span>
               </button>
             </div>
           </div>
@@ -610,15 +627,34 @@ function App() {
 
         {/* CENTER PANEL: LIVE EVENT STREAM */}
         <div className="lg:col-span-5 border-r border-slate-800 bg-slate-950 flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50">
+          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center">
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Live Threat Stream</h3>
+            {events.length > 0 && (
+              <button
+                onClick={handleClearAllEvents}
+                disabled={loading}
+                className="text-[10px] text-slate-400 hover:text-red-300 flex items-center gap-1 px-2 py-0.5 rounded border border-slate-800 hover:border-red-900/60 transition-all"
+                title="Clear all records"
+              >
+                <Trash2 size={10} /> Clear Stream
+              </button>
+            )}
           </div>
           
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {events.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-600">
-                <Activity size={48} className="mb-4 opacity-20" />
-                <p className="text-sm font-semibold uppercase tracking-widest">Waiting for events...</p>
+              <div className="h-full flex flex-col items-center justify-center text-slate-500 text-center p-6 my-auto">
+                <ShieldCheck size={56} className="text-emerald-500/40 mb-3" />
+                <p className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-1.5">Threat Stream Clean</p>
+                <p className="text-xs text-slate-400 max-w-xs mb-4 leading-relaxed">
+                  All mock and fake events have been cleared. Incoming scans from your <b>Chrome Extension</b> or <b>Manual Analysis</b> will stream here in real time.
+                </p>
+                <button
+                  onClick={() => setActiveTab('manual')}
+                  className="py-2 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold transition-all shadow-md"
+                >
+                  Analyze Content in Manual Tab
+                </button>
               </div>
             ) : (
               events.map((evt, idx) => {

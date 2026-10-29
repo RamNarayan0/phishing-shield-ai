@@ -159,3 +159,9 @@ def admin_reset_demo_data():
     """Admin endpoint to cleanly seed canonical demo scenarios, backing up first."""
     from ...db.cleanup import reset_demo_data
     return reset_demo_data()
+
+@router.post("/admin/clear-all-events", dependencies=[Depends(verify_admin_access)])
+def admin_clear_all_events():
+    """Admin endpoint to purge all threat events from MongoDB and memory."""
+    from ...db.mongodb import clear_all_alerts
+    return clear_all_alerts()

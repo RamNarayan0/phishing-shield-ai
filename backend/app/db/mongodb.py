@@ -311,6 +311,19 @@ def get_recent_alerts(limit: int = 50) -> List[Dict[str, Any]]:
     # Fallback to in-memory alerts
     return _in_memory_alerts[:limit]
 
+def clear_all_alerts() -> Dict[str, Any]:
+    """Clears all stored alerts from MongoDB and in-memory fallback cache."""
+    global _in_memory_alerts, _collection, _connected
+    _in_memory_alerts = []
+    deleted_count = 0
+    if _connected and _collection is not None:
+        try:
+            res = _collection.delete_many({})
+            deleted_count = res.deleted_count
+        except Exception as e:
+            logger.error(f"Error clearing alerts from MongoDB: {e}")
+    return {"status": "success", "deleted_count": deleted_count}
+
 def sanitize_uri(uri: str) -> str:
     """Masks username and password from MongoDB URI for safe logging."""
     if not uri:
