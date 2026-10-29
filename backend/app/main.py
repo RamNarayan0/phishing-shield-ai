@@ -47,7 +47,7 @@ else:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins if allowed_origins != ["*"] else ["*"],
-    allow_origin_regex=r"^chrome-extension://.*" if allowed_origins != ["*"] else None,
+    allow_origin_regex=r"^(chrome-extension://.*|https://.*\.vercel\.app|https://.*\.trycloudflare\.com|https://.*\.github\.io)$" if allowed_origins != ["*"] else None,
     allow_credentials=True if allowed_origins != ["*"] else False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
