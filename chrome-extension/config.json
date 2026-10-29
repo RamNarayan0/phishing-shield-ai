@@ -1,4 +1,4 @@
 {
-  "apiUrl": "https://raw-hunter-trusted-movements.trycloudflare.com",
-  "notes": "Configured by install.ps1. Supports Tailscale IP (e.g. http://100.x.y.z:8000) or public Cloud URLs."
+  "apiUrl": "http://127.0.0.1:8000",
+  "notes": "Configured for local development. Backend running on http://127.0.0.1:8000"
 }

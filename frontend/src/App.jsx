@@ -194,7 +194,7 @@ function App() {
     }
   }
 
-  const analyzeEvent = async (rawText, source = 'Android Notification', app = 'WhatsApp', sender = 'Unknown Contact') => {
+  const analyzeEvent = async (rawText, source = 'Web Security Scanner', app = 'Web Interceptor', sender = 'Unknown Contact') => {
     if (loading) return; // Prevent double submission
     setLoading(true);
     try {
@@ -361,7 +361,19 @@ function App() {
           </button>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <a
+            href="https://github.com/RamNarayan0/phishing-shield-ai/releases/download/v1.0.0/phishing-shield-ai-chrome-extension.zip"
+            download="phishing-shield-ai-chrome-extension.zip"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs px-3.5 py-2 rounded shadow-md border border-blue-400/30 transition-all cursor-pointer"
+            title="Download Chrome Extension (v1.0.0 ZIP)"
+          >
+            <Chrome size={15} className="text-white" />
+            <span>Install Extension</span>
+          </a>
+
           <div className="hidden sm:flex items-center gap-2 bg-slate-800/90 px-2.5 py-1 rounded text-xs border border-slate-700">
             <span className={`inline-block w-2 h-2 rounded-full ${backendOnline ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`}></span>
             <select 
@@ -372,9 +384,9 @@ function App() {
               }}
               className="bg-transparent text-slate-300 font-mono text-[11px] outline-none cursor-pointer"
             >
-              <option value="https://raw-hunter-trusted-movements.trycloudflare.com" className="bg-slate-900 text-slate-200">Live Public Cloud API</option>
               <option value="http://127.0.0.1:8000" className="bg-slate-900 text-slate-200">Local (127.0.0.1:8000)</option>
               <option value="https://phishing-shield-ai-backend.onrender.com" className="bg-slate-900 text-slate-200">Render Cloud API</option>
+              <option value="https://raw-hunter-trusted-movements.trycloudflare.com" className="bg-slate-900 text-slate-200">Live Public Cloud API</option>
             </select>
           </div>
 
@@ -482,18 +494,38 @@ function App() {
         {/* LEFT PANEL: SOURCES & DEMO CONTROLS */}
         <div className="lg:col-span-3 border-r border-slate-800 bg-slate-900 p-4 flex flex-col gap-6 overflow-y-auto">
           <div>
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Connected Sources</h3>
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Active Sources</h3>
             <ul className="space-y-3">
               <li className="flex items-center gap-3 text-sm font-semibold text-slate-300">
-                <Smartphone size={18} className="text-emerald-500" /> Android Notifications
+                <Chrome size={18} className="text-emerald-400" /> Chrome Extension (Active)
               </li>
               <li className="flex items-center gap-3 text-sm font-semibold text-slate-300">
-                <Chrome size={18} className="text-emerald-500" /> Chrome Extension
+                <Shield size={18} className="text-emerald-400" /> Web Threat Ingestion (Active)
               </li>
-              <li className="flex items-center gap-3 text-sm font-semibold text-slate-500">
-                <Mail size={18} /> Gmail / API (Future)
+              <li className="flex items-center gap-3 text-sm font-semibold text-slate-400">
+                <Server size={18} className="text-blue-400" /> REST API / SIEM Ingest (Active)
               </li>
             </ul>
+
+            {/* Extension Download Banner */}
+            <div className="mt-4 p-3 bg-slate-950 border border-blue-900/60 rounded-lg shadow-sm">
+              <div className="flex items-center gap-2 text-xs font-bold text-blue-300 mb-1.5">
+                <Chrome size={14} className="text-blue-400" />
+                <span>Get Chrome Extension</span>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-normal mb-2.5">
+                Scan active web pages and links before clicking.
+              </p>
+              <a
+                href="https://github.com/RamNarayan0/phishing-shield-ai/releases/download/v1.0.0/phishing-shield-ai-chrome-extension.zip"
+                download="phishing-shield-ai-chrome-extension.zip"
+                target="_blank"
+                rel="noreferrer"
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold transition-all shadow-sm"
+              >
+                <span>Download Extension (ZIP)</span>
+              </a>
+            </div>
           </div>
 
           <div className="pt-4 border-t border-slate-800">

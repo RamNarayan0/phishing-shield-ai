@@ -32,10 +32,9 @@
   <div class="settings-panel" id="settingsPanel">
     <label style="display:block; margin-bottom:4px; font-weight:bold; color:#cbd5e1;">Backend API Mode:</label>
     <select id="apiMode">
-      <option value="https://reference-centered-por-agree.trycloudflare.com">Live Public Cloud API (Active)</option>
-      <option value="auto">Auto (Local first, then Cloud)</option>
+      <option value="http://127.0.0.1:8000" selected>Local Backend (http://127.0.0.1:8000)</option>
       <option value="https://phishing-shield-ai-backend.onrender.com">Cloud Render Production</option>
-      <option value="http://127.0.0.1:8000">Local Dev Server (127.0.0.1:8000)</option>
+      <option value="auto">Auto Detect</option>
     </select>
   </div>
 
