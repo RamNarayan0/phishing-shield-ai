@@ -112,6 +112,6 @@ python cleanup_duplicates.py --apply
 Prototype Privacy Notice: Message content is processed for threat analysis. Do not submit real passwords, OTPs, banking credentials, or other sensitive personal information during testing.
 
 ## Future Scope
-- Integration with external threat intelligence APIs.
-- Fine-tuned NLP models for better text classification.
-- Android application for SMS and Notification scanning.
+- Integration with external threat intelligence APIs (VirusTotal, Google Safe Browsing).
+- Fine-tuned transformer models (DistilBERT/RoBERTa) for contextual zero-shot threat classification.
+- Automated incident response webhook integrations for enterprise SIEM/SOAR platforms.

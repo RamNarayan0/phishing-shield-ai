@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, field_validator
 
 class MessagePayload(BaseModel):
     request_id: str = Field(default_factory=lambda: str(uuid.uuid4()), max_length=128)
-    source_platform: str = Field(default="web", max_length=100, description="web, android, chrome")
+    source_platform: str = Field(default="web", max_length=100, description="web, chrome, api")
     sender_id: Optional[str] = Field(default=None, max_length=500, description="Sender address or phone number")
     raw_text: str = Field(..., max_length=50000, description="Raw message text to analyze (max 50,000 characters)")
     timestamp: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
