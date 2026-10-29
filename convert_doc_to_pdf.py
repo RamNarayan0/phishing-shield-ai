@@ -34,8 +34,8 @@ class SimpleNumberedCanvas(canvas.Canvas):
 
         # Top Header (pages 2+)
         if self._pageNumber > 1:
-            self.drawString(45, 810, "PHISHING SHIELD AI — TECHNICAL STACK & ARCHITECTURE GUIDE")
-            self.drawRightString(550, 810, "OVERVIEW")
+            self.drawString(45, 810, "PHISHING SHIELD AI — TECH STACK, ML MODELS & CYBERSECURITY")
+            self.drawRightString(550, 810, "OFFICIAL ARCHITECTURE GUIDE")
             self.setStrokeColor(colors.HexColor("#CBD5E1"))
             self.setLineWidth(0.8)
             self.line(45, 802, 550, 802)
@@ -46,7 +46,7 @@ class SimpleNumberedCanvas(canvas.Canvas):
         self.line(45, 42, 550, 42)
 
         self.setFont("Helvetica", 8.5)
-        self.drawString(45, 28, "Phishing Shield AI — Simplified System Documentation")
+        self.drawString(45, 28, "Phishing Shield AI — Threat Detection & Machine Learning Documentation")
         self.drawRightString(550, 28, f"Page {self._pageNumber} of {total_pages}")
         self.restoreState()
 
@@ -58,8 +58,8 @@ def generate_simple_pdf(md_path: str, output_path: str):
     doc = SimpleDocTemplate(
         output_path,
         pagesize=A4,
-        leftMargin=45,
-        rightMargin=45,
+        leftMargin=42,
+        rightMargin=42,
         topMargin=45,
         bottomMargin=50
     )
@@ -67,19 +67,19 @@ def generate_simple_pdf(md_path: str, output_path: str):
     styles = getSampleStyleSheet()
 
     c_primary = colors.HexColor("#0F172A")    # Dark slate
-    c_blue = colors.HexColor("#2563EB")       # Clear royal blue
+    c_blue = colors.HexColor("#2563EB")       # Royal blue
     c_dark_blue = colors.HexColor("#1E3A8A")  # Navy
     c_text = colors.HexColor("#1E293B")       # Dark readable text
-    c_sub = colors.HexColor("#475569")        # Subtitle slate
+    c_sub = colors.HexColor("#475569")        # Slate 600
     c_border = colors.HexColor("#CBD5E1")
-    c_step_bg = colors.HexColor("#F1F5F9")
+    c_step_bg = colors.HexColor("#F8FAFC")
 
     title_style = ParagraphStyle(
         'DocTitle',
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
-        fontSize=20,
-        leading=24,
+        fontSize=18,
+        leading=22,
         textColor=c_primary,
         spaceAfter=4
     )
@@ -88,31 +88,31 @@ def generate_simple_pdf(md_path: str, output_path: str):
         'DocSubtitle',
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
-        fontSize=11,
+        fontSize=10.5,
         leading=14,
         textColor=c_blue,
-        spaceAfter=10
+        spaceAfter=8
     )
 
     meta_style = ParagraphStyle(
         'DocMeta',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=9,
-        leading=12,
+        fontSize=8.5,
+        leading=11,
         textColor=c_sub,
-        spaceAfter=10
+        spaceAfter=8
     )
 
     h1_style = ParagraphStyle(
         'H1',
         parent=styles['Heading1'],
         fontName='Helvetica-Bold',
-        fontSize=13,
-        leading=16,
+        fontSize=12.5,
+        leading=15.5,
         textColor=c_dark_blue,
-        spaceBefore=12,
-        spaceAfter=6,
+        spaceBefore=11,
+        spaceAfter=5,
         keepWithNext=True
     )
 
@@ -120,11 +120,11 @@ def generate_simple_pdf(md_path: str, output_path: str):
         'H2',
         parent=styles['Heading2'],
         fontName='Helvetica-Bold',
-        fontSize=10.5,
-        leading=13.5,
+        fontSize=10,
+        leading=13,
         textColor=c_blue,
-        spaceBefore=9,
-        spaceAfter=4,
+        spaceBefore=8,
+        spaceAfter=3,
         keepWithNext=True
     )
 
@@ -132,21 +132,21 @@ def generate_simple_pdf(md_path: str, output_path: str):
         'Body',
         parent=styles['BodyText'],
         fontName='Helvetica',
-        fontSize=9,
-        leading=13,
+        fontSize=8.5,
+        leading=12,
         textColor=c_text,
-        spaceAfter=5
+        spaceAfter=4
     )
 
     bullet_style = ParagraphStyle(
         'Bullet',
         parent=styles['BodyText'],
         fontName='Helvetica',
-        fontSize=9,
-        leading=13,
+        fontSize=8.5,
+        leading=12,
         textColor=c_text,
-        leftIndent=14,
-        spaceAfter=3
+        leftIndent=12,
+        spaceAfter=2.5
     )
 
     step_box_style = ParagraphStyle(
@@ -154,22 +154,22 @@ def generate_simple_pdf(md_path: str, output_path: str):
         parent=styles['Normal'],
         fontName='Helvetica',
         fontSize=8.5,
-        leading=12,
+        leading=11.5,
         textColor=c_text,
         backColor=c_step_bg,
         borderColor=colors.HexColor("#94A3B8"),
         borderWidth=0.8,
-        borderPadding=7,
+        borderPadding=6,
         spaceBefore=3,
-        spaceAfter=5
+        spaceAfter=4
     )
 
     th_style = ParagraphStyle(
         'TH',
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
-        fontSize=9,
-        leading=12,
+        fontSize=8,
+        leading=10.5,
         textColor=colors.white
     )
 
@@ -177,17 +177,17 @@ def generate_simple_pdf(md_path: str, output_path: str):
         'TD',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=8.5,
-        leading=11.5,
+        fontSize=7.5,
+        leading=10,
         textColor=c_text
     )
 
     story = []
 
     # Title header
-    story.append(Paragraph("Phishing Shield AI — Technical Stack & Architecture", title_style))
-    story.append(Paragraph("Simple & Clear Overview of Technologies, AI Models, and Cybersecurity Protection", subtitle_style))
-    story.append(Paragraph("<b>Author / System Architect:</b> Ram Narayan &nbsp;|&nbsp; <b>Framework:</b> Python FastAPI + React + Scikit-Learn &nbsp;|&nbsp; <b>Date:</b> October 2026", meta_style))
+    story.append(Paragraph("Phishing Shield AI — Complete Tech Stack, Machine Learning & Cybersecurity Guide", title_style))
+    story.append(Paragraph("Clear Technical Documentation: System Architecture, AI Models, and Threat Defenses", subtitle_style))
+    story.append(Paragraph("<b>Author / System Architect:</b> Ram Narayan &nbsp;|&nbsp; <b>Framework:</b> Python FastAPI 3.11 + React 18 + Scikit-Learn 1.5 &nbsp;|&nbsp; <b>Date:</b> October 2026", meta_style))
     story.append(HRFlowable(width="100%", thickness=1.5, color=c_blue, spaceBefore=2, spaceAfter=8))
 
     lines = md_text.splitlines()
@@ -195,21 +195,16 @@ def generate_simple_pdf(md_path: str, output_path: str):
     table_rows = []
 
     def format_inline(text: str) -> str:
-        # Code backticks
         code_spans = []
         def save_code(m):
             code_spans.append(m.group(1))
             return f"__CODE_{len(code_spans)-1}__"
         t = re.sub(r'`([^`]+)`', save_code, text)
 
-        # HTML escape
         t = html.escape(t)
-
-        # Bold & Italic
         t = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', t)
         t = re.sub(r'\*(.*?)\*', r'<i>\1</i>', t)
 
-        # Restore code
         for idx, span in enumerate(code_spans):
             rep = f'<font face="Courier" color="#1D4ED8"><b>{html.escape(span)}</b></font>'
             t = t.replace(f"__CODE_{idx}__", rep)
@@ -230,17 +225,24 @@ def generate_simple_pdf(md_path: str, output_path: str):
                 p_row.append(Paragraph(format_inline(cell.strip()), st))
             data.append(p_row)
 
-        # Table styling: Category (120), Technology (130), Purpose (255)
-        col_widths = [120, 130, 255]
+        col_count = len(table_rows[0])
+        avail_width = 511
+        if col_count == 4:
+            col_widths = [95, 95, 65, 256]
+        elif col_count == 3:
+            col_widths = [120, 130, 261]
+        else:
+            col_widths = [avail_width / col_count] * col_count
+
         t = Table(data, colWidths=col_widths, repeatRows=1)
         t_style = [
             ('BACKGROUND', (0, 0), (-1, 0), c_primary),
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('TOPPADDING', (0, 0), (-1, -1), 4),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ('LEFTPADDING', (0, 0), (-1, -1), 6),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ('LEFTPADDING', (0, 0), (-1, -1), 5),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 5),
             ('GRID', (0, 0), (-1, -1), 0.5, c_border),
         ]
         for r in range(1, len(data)):
@@ -249,7 +251,7 @@ def generate_simple_pdf(md_path: str, output_path: str):
         t.setStyle(TableStyle(t_style))
         story.append(Spacer(1, 4))
         story.append(t)
-        story.append(Spacer(1, 6))
+        story.append(Spacer(1, 5))
         table_rows = []
         in_table = False
 
@@ -278,7 +280,7 @@ def generate_simple_pdf(md_path: str, output_path: str):
             flush_table()
 
         if stripped in ("---", "***", "___"):
-            story.append(HRFlowable(width="100%", thickness=0.6, color=c_border, spaceBefore=4, spaceAfter=6))
+            story.append(HRFlowable(width="100%", thickness=0.6, color=c_border, spaceBefore=4, spaceAfter=5))
             i += 1
             continue
 
@@ -286,12 +288,11 @@ def generate_simple_pdf(md_path: str, output_path: str):
             i += 1
             continue
 
-        # Skip document top title
         if stripped.startswith("# Phishing Shield AI"):
             i += 1
             continue
 
-        # Step 1, Step 2, Step 3, Step 4 in Section 2 styled into clean boxes
+        # Step 1, Step 2, Step 3, Step 4 styled into clean visible boxes
         if stripped.startswith("* **Step "):
             step_content = stripped[2:].strip()
             story.append(Paragraph(format_inline(step_content), step_box_style))
@@ -330,7 +331,6 @@ def generate_simple_pdf(md_path: str, output_path: str):
             i += 1
             continue
 
-        # Normal text
         story.append(Paragraph(format_inline(stripped), body_style))
         i += 1
 
