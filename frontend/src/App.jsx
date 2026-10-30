@@ -128,7 +128,7 @@ function App() {
   // Ref to automatically scroll to the latest event
   const streamEndRef = useRef(null)
   
-  const ACTIVE_CLOUD_API = 'https://supplemental-work-qty-yeast.trycloudflare.com';
+  const ACTIVE_CLOUD_API = 'https://thank-causes-materials-seed.trycloudflare.com';
   const defaultApi = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
     ? 'http://127.0.0.1:8000'
     : ACTIVE_CLOUD_API;
@@ -136,7 +136,7 @@ function App() {
   const [apiUrl, setApiUrl] = useState(() => {
     if (typeof window === 'undefined') return defaultApi;
     const stored = localStorage.getItem('phishing_api_url');
-    if (!stored || stored.includes('raw-hunter') || stored.includes('reference-centered') || stored.includes('trycloudflare.com') && !stored.includes('supplemental-work')) {
+    if (!stored || (stored.includes('trycloudflare.com') && !stored.includes('thank-causes-materials-seed'))) {
       localStorage.setItem('phishing_api_url', defaultApi);
       return defaultApi;
     }
@@ -411,7 +411,7 @@ function App() {
             >
               <option value="http://127.0.0.1:8000" className="bg-slate-900 text-slate-200">Local (127.0.0.1:8000)</option>
               <option value="https://phishing-shield-ai-backend.onrender.com" className="bg-slate-900 text-slate-200">Render Cloud API</option>
-              <option value="https://supplemental-work-qty-yeast.trycloudflare.com" className="bg-slate-900 text-slate-200">Live Public Cloud API</option>
+              <option value="https://thank-causes-materials-seed.trycloudflare.com" className="bg-slate-900 text-slate-200">Live Public Cloud API</option>
             </select>
           </div>
 

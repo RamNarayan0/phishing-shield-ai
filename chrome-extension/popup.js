@@ -5,17 +5,24 @@ chrome.storage.local.get(["apiUrl"], async (res) => {
   const modeSelect = document.getElementById("apiMode");
   let currentUrl = res.apiUrl;
 
-  if (!currentUrl) {
-    try {
-      const configRes = await fetch(chrome.runtime.getURL("config.json"));
-      if (configRes.ok) {
-        const cfg = await configRes.json();
-        if (cfg && cfg.apiUrl) {
+  // Always check config.json for the latest active cloud endpoint
+  try {
+    const configRes = await fetch(chrome.runtime.getURL("config.json"));
+    if (configRes.ok) {
+      const cfg = await configRes.json();
+      if (cfg && cfg.apiUrl) {
+        // If current stored URL is missing, or is a stale trycloudflare URL, refresh it
+        if (!currentUrl || (currentUrl.includes("trycloudflare.com") && currentUrl !== cfg.apiUrl)) {
           currentUrl = cfg.apiUrl;
           chrome.storage.local.set({ apiUrl: currentUrl });
         }
       }
-    } catch (e) {}
+    }
+  } catch (e) {}
+
+  if (!currentUrl) {
+    currentUrl = "https://thank-causes-materials-seed.trycloudflare.com";
+    chrome.storage.local.set({ apiUrl: currentUrl });
   }
 
   if (currentUrl) {
@@ -30,7 +37,7 @@ chrome.storage.local.get(["apiUrl"], async (res) => {
     if (!matched && currentUrl !== "auto") {
       const customOpt = document.createElement("option");
       customOpt.value = currentUrl;
-      customOpt.textContent = `Configured Backend (${currentUrl})`;
+      customOpt.textContent = `Configured Cloud (${currentUrl})`;
       modeSelect.insertBefore(customOpt, modeSelect.firstChild);
       modeSelect.value = currentUrl;
     }

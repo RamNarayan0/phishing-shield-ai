@@ -1,6 +1,6 @@
-// background.js - Phishing Shield AI Chrome Extension (Cloud, Tailscale & Local Support)
+// background.js - Phishing Shield AI Chrome Extension (Cloud & Local Support)
 
-const DEFAULT_CLOUD_URL = "https://supplemental-work-qty-yeast.trycloudflare.com";
+const FALLBACK_CLOUD_URL = "https://thank-causes-materials-seed.trycloudflare.com";
 
 async function resolveDefaultApiUrl() {
   try {
@@ -10,16 +10,13 @@ async function resolveDefaultApiUrl() {
       if (data && data.apiUrl) return data.apiUrl;
     }
   } catch (e) {}
-  return "auto";
+  return FALLBACK_CLOUD_URL;
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
-  console.log("Phishing Shield AI installed.");
-  const res = await chrome.storage.local.get(["apiUrl"]);
-  if (!res.apiUrl) {
-    const defaultUrl = await resolveDefaultApiUrl();
-    chrome.storage.local.set({ apiUrl: defaultUrl });
-  }
+  console.log("Phishing Shield AI installed/updated.");
+  const defaultUrl = await resolveDefaultApiUrl();
+  chrome.storage.local.set({ apiUrl: defaultUrl });
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -33,25 +30,34 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           urls: sender.tab ? [sender.tab.url] : []
         };
 
-        // Determine target endpoints (User preference > config.json > Cloud > Local fallback)
+        const defaultUrl = await resolveDefaultApiUrl();
         const storageData = await chrome.storage.local.get(["apiUrl"]);
         let configUrl = storageData.apiUrl;
-        if (!configUrl || configUrl === "auto") {
-          const fileUrl = await resolveDefaultApiUrl();
-          if (fileUrl && fileUrl !== "auto") {
-            configUrl = fileUrl;
-          }
+        
+        // Discard stale trycloudflare URLs that don't match the current config
+        if (!configUrl || configUrl === "auto" || (configUrl.includes("trycloudflare.com") && configUrl !== defaultUrl)) {
+          configUrl = defaultUrl;
+          chrome.storage.local.set({ apiUrl: configUrl });
         }
-        configUrl = configUrl || "auto";
 
         let candidateEndpoints = [];
+        // 1. Primary configured Cloud / Custom endpoint
         if (configUrl && configUrl !== "auto") {
           candidateEndpoints.push(configUrl.replace(/\/+$/, '') + "/api/verify-message");
-        } else {
-          // In auto mode, try configured default cloud, then local fallbacks
-          candidateEndpoints.push(`${DEFAULT_CLOUD_URL}/api/verify-message`);
-          candidateEndpoints.push("http://127.0.0.1:8000/api/verify-message");
-          candidateEndpoints.push("http://localhost:8000/api/verify-message");
+        }
+        // 2. Default Cloud endpoint if different
+        const defaultEndpoint = defaultUrl.replace(/\/+$/, '') + "/api/verify-message";
+        if (!candidateEndpoints.includes(defaultEndpoint)) {
+          candidateEndpoints.push(defaultEndpoint);
+        }
+        // 3. Local endpoints for offline / local dev
+        const localPrimary = "http://127.0.0.1:8000/api/verify-message";
+        const localSecondary = "http://localhost:8000/api/verify-message";
+        if (!candidateEndpoints.includes(localPrimary)) {
+          candidateEndpoints.push(localPrimary);
+        }
+        if (!candidateEndpoints.includes(localSecondary)) {
+          candidateEndpoints.push(localSecondary);
         }
 
         let data = null;
@@ -60,7 +66,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         for (const endpoint of candidateEndpoints) {
           try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 6000);
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
 
             const res = await fetch(endpoint, {
               method: "POST",
